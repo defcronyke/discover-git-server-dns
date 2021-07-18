@@ -1,4 +1,6 @@
 #!/bin/bash
 
-ip route ls | grep "`./git-nic.sh`" | tail -n +2 | head -n 1 | awk '{print $1}'
+for i in `./git-nic.sh`; do
+	ip route ls | grep "$i" | grep "proto" | awk '{print $1}' | grep -v "default"
+done
 
