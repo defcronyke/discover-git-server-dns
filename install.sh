@@ -17,7 +17,7 @@ discover_git_server_dns_install() {
   echo ""
 
   cat db.git.tmpl | \
-  sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`0${RANDOM}")/g" | \
+  sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
   sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
   sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
   sudo tee /etc/bind/db.git
