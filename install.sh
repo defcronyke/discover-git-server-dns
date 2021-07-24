@@ -44,10 +44,12 @@ discover_git_server_dns_install() {
   echo "Enabling systemd service: bind9.service"
   echo ""
   sudo systemctl reenable bind9 2>/dev/null || \
-  sudo systemctl reenable named
+  sudo systemctl reenable named 2>/dev/null || \
+  true
 
   sudo systemctl restart bind9 2>/dev/null || \
-  sudo systemctl restart named
+  sudo systemctl restart named 2>/dev/null || \
+  true
 
   res=$?
 
