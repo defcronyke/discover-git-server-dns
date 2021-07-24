@@ -2,9 +2,9 @@
 
 # If your GitWeb servers take extra time 
 # to respond, you can increase this value
-# from the default of 10 seconds detection
+# from the default n seconds detection
 # timeout.
-GC_LOCAL_SERVER_DETECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_TIMEOUT:-10}
+GC_LOCAL_SERVER_DETECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_TIMEOUT:-6}
 
 GC_NEW_GIT_SERVERS_TEST=( )
 GC_NEW_GIT_SERVERS=( )
