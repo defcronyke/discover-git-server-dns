@@ -41,15 +41,25 @@ discover_git_server_dns_install() {
     echo ""
   fi
 
-  echo "Enabling systemd service: bind9.service"
-  echo ""
-  sudo systemctl reenable bind9 2>/dev/null || \
-  sudo systemctl reenable named 2>/dev/null || \
-  true
+  dig @"$(hostname)" "$(hostname)" >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "Enabling systemd service: bind9.service"
+    echo ""
+    sudo systemctl reenable bind9 2>/dev/null || \
+    sudo systemctl reenable named 2>/dev/null || \
+    true
 
-  sudo systemctl restart bind9 2>/dev/null || \
-  sudo systemctl restart named 2>/dev/null || \
-  true
+    sudo systemctl restart bind9 2>/dev/null || \
+    sudo systemctl restart named 2>/dev/null || \
+    true
+  else
+    echo "NOTICE: Not enabling bind9.service because there was already some DNS service running."
+    echo ""
+
+    sudo systemctl try-restart bind9 2>/dev/null || \
+    sudo systemctl try-restart named 2>/dev/null || \
+    true
+  fi
 
   res=$?
 
