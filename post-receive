@@ -13,12 +13,12 @@ gc_dns_post_receive_update_bind_config() {
     echo "info: The bind DNS config has been updated, and the new config is now active."
   fi
 
-  current_dir="$PWD"
-  cd ~/git-server/discover-git-server-dns
-  git fetch --all
-  git pull
-  ./git-update-srv.sh
-  cd "$current_dir"
+  # current_dir="$PWD"
+  # cd ~/git-server/discover-git-server-dns
+  # git fetch --all
+  # git pull
+  # ./git-update-srv.sh
+  # cd "$current_dir"
 
 	echo "The git hook finished successfully: ${BASH_SOURCE[0]} $@"
 
