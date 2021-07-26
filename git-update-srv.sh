@@ -51,6 +51,7 @@ gc_dns_git_server_update_srv_records() {
       
     else
       cd "bind-${i}" || continue
+      git reset --hard HEAD
       git fetch --all
       git pull
       gc_dns_git_server_update_srv_records_git $@
