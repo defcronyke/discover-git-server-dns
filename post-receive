@@ -15,7 +15,7 @@ gc_dns_post_receive_update_bind_config() {
 
 	echo "The git hook finished successfully: ${BASH_SOURCE[0]} $@"
 
-  return true
+  return 0
 }
 
 gc_dns_post_receive_update_bind_config $@
