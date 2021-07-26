@@ -31,7 +31,10 @@ gc_dns_git_server_list_servers_all() {
   gc_found_hostnames=( )
 
   for i in "$@"; do
-    gc_found_servers+=( "$(gc_dns_git_server_list_servers_init "$i" | sort | uniq)" )
+    for k in "$(gc_dns_git_server_list_servers_init "$i" | sort | uniq)"; do
+      gc_found_servers+=( "$k" )
+    done
+    
     gc_found_hostnames+=( "$i" )
   done
 
