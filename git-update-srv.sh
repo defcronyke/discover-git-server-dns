@@ -11,7 +11,7 @@ gc_dns_git_server_update_srv_records_git() {
 
 
   while read i; do
-    echo "_git._tcp  IN      SRV     $i" | tee -a db.git.next
+    echo "$i" | tee -a db.git.next
   done <db.git.next.tmp
 
   cp -f db.git db.git.bak
