@@ -34,11 +34,11 @@ gc_dns_git_server_list_servers_all() {
     for k in "$(gc_dns_git_server_list_servers_init "$i" | sort | uniq)"; do
       gc_found_servers+=( "$k" )
     done
-    
+
     gc_found_hostnames+=( "$i" )
   done
 
-  for i in ${gc_found_servers[@]}; do
+  for i in "${gc_found_servers[@]}"; do
     echo "$i"
     gc_found_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
   done
