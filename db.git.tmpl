@@ -14,4 +14,4 @@ $TTL    604800
 @       IN      A       {BIND_DB_GIT_IP_ADDR}
 @       IN      AAAA    ::1
 {BIND_DB_GIT_HOSTNAME}.   IN      CNAME   git.
-_git._tcp.git.  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}.
+_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}.
