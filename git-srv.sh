@@ -12,18 +12,18 @@ gc_dns_git_server_list_servers_init() {
   sed 's/;; connection timed out; no servers could be reached//g' | \
   grep -v -e '^[[:space:]]*$'
 
-  if [ $? -ne 0 ]; then
+  # if [ $? -ne 0 ]; then
     n=1
 
-    while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
-      dig +timeout=2 +short +nocomments @git${n} _git._tcp.git SRV 2>/dev/null | \
-      sed 's/;; connection timed out; no servers could be reached//g' | \
-      grep -v -e '^[[:space:]]*$' && \
-        break
+  while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
+    dig +timeout=2 +short +nocomments @git${n} _git._tcp.git SRV 2>/dev/null | \
+    sed 's/;; connection timed out; no servers could be reached//g' | \
+    grep -v -e '^[[:space:]]*$' && \
+      break
 
-      ((n++))
-    done
-  fi
+    ((n++))
+  done
+  # fi
 }
 
 gc_dns_git_server_list_servers_all() {
