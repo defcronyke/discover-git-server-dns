@@ -25,12 +25,17 @@ for i in ${GC_NEW_GIT_SERVERS_TEST[@]}; do
   fi
 done
 
-# for i in ${GC_NEW_GIT_SERVERS[@]}; do
-#   echo "$i"
-# done
-
 for i in "`./git-srv.sh`"; do
-	GC_ACTIVE_GIT_SERVERS+=( "$(echo "$i" | sed 's/\.$//g' | awk '{print "http://"$NF":"$(NF-1)}' 2>/dev/null)" )
+  gc_servers=( )
+
+  gc_servers+=( "$(echo "$i" | sed 's/\.$//g' | awk '{print "http://"$NF":"$(NF-1)}' 2>/dev/null)" )
+
+  for j in ${gc_servers[@]}; do
+    curl -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      GC_ACTIVE_GIT_SERVERS+=( "$j" )
+    fi
+  done
 done
 
 echo "$(for i in ${GC_ACTIVE_GIT_SERVERS[@]}; do echo "$i"; done)" | sort | uniq
