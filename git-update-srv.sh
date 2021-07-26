@@ -4,7 +4,7 @@
 #
 
 gc_dns_git_server_update_srv_records_git() {
-  cat db.git | grep "_git\._tcp\.git\." | sort | uniq | tee db.git.next.tmp
+  cat db.git | grep "_git\._tcp" | sort | uniq | tee db.git.next.tmp
     
   echo "${gc_update_servers[@]}" | tee -a db.git.next.tmp
 
@@ -15,7 +15,7 @@ gc_dns_git_server_update_srv_records_git() {
 
   cp -f db.git db.git.bak
 
-  cat db.git | grep -v "_git\._tcp\.git\." | tee db.git.tmp
+  cat db.git | grep -v "_git\._tcp" | tee db.git.tmp
   cat db.git.next | sort | uniq | tee -a db.git.tmp
   mv db.git.tmp db.git
 
