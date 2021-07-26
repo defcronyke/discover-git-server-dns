@@ -30,7 +30,10 @@ gc_dns_git_server_update_srv_records_git() {
 
 gc_dns_git_server_update_srv_records() {
   gc_update_servers=( )
-  gc_update_servers+=( "$(./git-srv.sh $@ | grep " 1234 ")" )
+
+  for i in $@; do
+    gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
+  done
   
   gc_update_servers_hostnames=( )
   gc_update_servers_hostnames+=( "$@" )
