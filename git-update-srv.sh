@@ -50,6 +50,7 @@ gc_dns_git_server_update_srv_records() {
 
   # echo "${gc_update_servers_hostnames[@]}"
 
+  rm -rf workdir
   mkdir -p workdir
   cd workdir
 
