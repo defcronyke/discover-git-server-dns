@@ -5,7 +5,10 @@
 
 gc_dns_git_server_update_srv_records_git() {
   cat db.git | grep "_git\._tcp" | sort | uniq | tee db.git.next.tmp
-  sudo cat /etc/bind/db.git | grep "_git\._tcp" | sort | uniq | tee -a db.git.next.tmp
+  
+  if [ "basename $(echo "$PWD")" != "gitcid" ]; then
+    sudo cat /etc/bind/db.git | grep "_git\._tcp" | sort | uniq | tee -a db.git.next.tmp
+  fi
     
   for i in ${gc_update_servers[@]}; do
     echo "_git._tcp  IN      SRV     $i" | tee -a db.git.next.tmp
