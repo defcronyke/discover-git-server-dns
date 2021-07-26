@@ -10,7 +10,7 @@ gc_dns_git_server_update_srv_records_git() {
   cat /etc/bind/db.git | grep "_git\._tcp" | sort | uniq | tee -a db.git.next.tmp
   # fi
     
-  for i in ${gc_update_servers[@]}; do
+  for i in "${gc_update_servers[@]}"; do
     echo "_git._tcp  IN      SRV     $i" | tee -a db.git.next.tmp
   done
   
@@ -44,7 +44,7 @@ gc_dns_git_server_update_srv_records() {
     gc_update_servers_hostnames+=( "$i" )
   done
 
-  for i in ${gc_update_servers[@]}; do
+  for i in "${gc_update_servers[@]}"; do
     gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
   done
 
