@@ -14,7 +14,7 @@ gc_dns_post_receive_update_bind_config() {
   fi
 
   current_dir="$PWD"
-  cd ~/git-server-discover-git-server-dns
+  cd ~/git-server/discover-git-server-dns
   ./git-update-srv.sh
   cd "$current_dir"
 
