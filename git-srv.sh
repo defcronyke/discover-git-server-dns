@@ -31,6 +31,7 @@ gc_dns_git_server_list_servers_all() {
   gc_found_hostnames=( )
 
   gc_found_servers+=( "$(gc_dns_git_server_list_servers_init $@ | sort | uniq)" )
+  gc_found_hostnames+=( "$@" )
   gc_found_hostnames+=( "$(echo "${gc_found_servers[@]}" | awk '{print $NF}' | sed 's/\.$//')" )
 
   echo "${gc_found_servers[@]}"
