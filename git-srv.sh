@@ -13,7 +13,7 @@ gc_dns_git_server_list_servers_init() {
   grep -v -e '^[[:space:]]*$'
 
   # if [ $? -ne 0 ]; then
-    n=1
+  n=1
 
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
     dig +timeout=2 +short +nocomments @git${n} _git._tcp.git SRV 2>/dev/null | \
@@ -30,11 +30,17 @@ gc_dns_git_server_list_servers_all() {
   gc_found_servers=( )
   gc_found_hostnames=( )
 
-  gc_found_servers+=( "$(gc_dns_git_server_list_servers_init $@ | sort | uniq)" )
-  gc_found_hostnames+=( "$@" )
-  gc_found_hostnames+=( "$(echo "${gc_found_servers[@]}" | awk '{print $NF}' | sed 's/\.$//')" )
+  for i in "$@"; do
+    gc_found_servers+=( "$(gc_dns_git_server_list_servers_init "$i" | sort | uniq)" )
+    gc_found_hostnames+=( "$i" )
+  done
 
-  echo "${gc_found_servers[@]}"
+  for i in ${gc_found_servers[@]}; do
+    echo "$i"
+    gc_found_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
+  done
+
+  # echo "${gc_found_servers[@]}"
 
   k=0
   for i in ${gc_found_hostnames[@]}; do
