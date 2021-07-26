@@ -1,9 +1,52 @@
 #!/bin/bash
-# Get all A records for zone "git" from any DNS server
-# which responds to broadcast pings on our network.
+# 
+# List SRV records on all detected git servers.
 #
-# Run this on the git servers first to enable broadcast response:
-#   echo 0 | sudo tee /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
 
-IP_ADDRESSES=("$(IP_ADDRESSES=("$(for i in `./git-dns.sh`; do (dig +timeout=1 +short +nocomments @$i _git._tcp.git SRV | sed 's/;; connection timed out; no servers could be reached//g' | grep -v "^$" ) & done; for job in `jobs -p`; do wait $job; done)"); echo "${IP_ADDRESSES[@]}")"); for i in "${IP_ADDRESSES[@]}"; do echo "$i" | sort | uniq; done
+gc_dns_git_server_list_servers_init() {
+  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-100}
+  
+  trap 'return 1;' INT
 
+  dig +timeout=2 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
+  sed 's/;; connection timed out; no servers could be reached//g' | \
+  grep -v -e '^[[:space:]]*$'
+
+  if [ $? -ne 0 ]; then
+    n=1
+
+    while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
+      dig +timeout=2 +short +nocomments @git${n} _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -v -e '^[[:space:]]*$' && \
+        break
+
+      ((n++))
+    done
+  fi
+}
+
+gc_dns_git_server_list_servers_all() {
+  gc_found_servers=( )
+  gc_found_hostnames=( )
+
+  gc_found_servers+=( "$(gc_dns_git_server_list_servers_init $@ | sort | uniq)" )
+  gc_found_hostnames+=( "$(echo "${gc_found_servers[@]}" | awk '{print $NF}' | sed 's/\.$//')" )
+
+  echo "${gc_found_servers[@]}"
+
+  k=0
+  for i in ${gc_found_hostnames[@]}; do
+    dig +timeout=2 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
+    sed 's/;; connection timed out; no servers could be reached//g' | \
+    grep -v -e '^[[:space:]]*$'
+
+    ((k++))
+  done
+}
+
+gc_dns_git_server_list_servers() {
+  gc_dns_git_server_list_servers_all $@ | sort | uniq
+}
+
+gc_dns_git_server_list_servers $@

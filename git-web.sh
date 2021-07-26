@@ -28,7 +28,7 @@ done
 for i in "`./git-srv.sh`"; do
   gc_servers=( )
 
-  gc_servers+=( "$(echo "$i" | sed 's/\.$//g' | awk '{print "http://"$NF":"$(NF-1)}' 2>/dev/null)" )
+  gc_servers+=( "$(echo "$i" | sed 's/\.$//g' | grep " 1234 " | awk '{print "http://"$NF":"$(NF-1)}' 2>/dev/null)" )
 
   for j in ${gc_servers[@]}; do
     curl -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
