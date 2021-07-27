@@ -148,7 +148,7 @@ gc_dns_git_server_update_srv_records_git() {
       echo "ERROR: Failed pulling repo: ~/git/etc/bind.git"
       echo ""
       # cd "$current_dir2"
-      # continue
+      continue
     fi
 
     cd ..
@@ -161,7 +161,7 @@ gc_dns_git_server_update_srv_records_git() {
       echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
       echo ""
       # cd "$current_dir2"
-      # continue
+      continue
     fi
 
     cd "$current_dir2"
