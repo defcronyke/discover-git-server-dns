@@ -212,16 +212,32 @@ gc_dns_git_server_update_srv_records() {
   gc_update_servers=( )
   gc_update_servers_hostnames=( )
 
-  for i in "$@"; do
-    # echo "$i"
-    for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"; do
+  if [ -f "git-srv.sh" ]; then
+    for k in "$(./git-srv.sh)"; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
     done
+  elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
+    for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"; do
+      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+    done
+  fi
+
+  for i in "$@"; do
+    # echo "$i"
+    if [ -f "git-srv.sh" ]; then
+      for k in "$(./git-srv.sh "$i")"; do
+        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+      done
+    elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
+      for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"; do
+        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+      done
+    fi
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
 
     gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
 
-    dig +time=2 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
     sed 's/;; connection timed out; no servers could be reached//g' | \
     grep -v -e '^[[:space:]]*$'
     if [ $? -eq 0 ]; then
