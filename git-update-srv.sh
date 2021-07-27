@@ -245,9 +245,9 @@ gc_dns_git_server_update_srv_records() {
     fi
   done
 
-  # for i in "${gc_update_servers[@]}"; do
-  #   gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
-  # done
+  for i in "${gc_update_servers[@]}"; do
+    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
+  done
 
   # echo "${gc_update_servers_hostnames[@]}"
 
@@ -257,7 +257,7 @@ gc_dns_git_server_update_srv_records() {
 
   current_dir="$PWD"
 
-  for i in "${gc_update_servers_hostnames[@]}"; do
+  for i in ${gc_update_servers_hostnames[@]}; do
     mkdir -p $HOME/.ssh
     chmod 700 $HOME/.ssh
     ssh-keygen -F "$i" || ssh-keyscan "$i" >>$HOME/.ssh/known_hosts
