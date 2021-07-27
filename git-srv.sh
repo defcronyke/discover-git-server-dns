@@ -32,19 +32,18 @@ gc_dns_git_server_list_servers_init() {
 
   trap 'gc_dns_git_server_list_servers_cleanup $@; return 2;' INT
 
-  { gc_dns_git_server_list_servers_self $@; return $?; } & tasks+=( "$!" )
+  { gc_dns_git_server_list_servers_self $@; } & tasks+=( "$!" )
 
   n=1
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
-    { gc_dns_git_server_list_servers_guess $n $@; return $?; } & tasks+=( "$!" )
+    { gc_dns_git_server_list_servers_guess $n $@; } & tasks+=( "$!" )
     ((n++))
   done
 
   # while [ true ]; do
   for i in $(jobs -p); do
     # for k in ${tasks[@]}; do
-    wait $i || \
-      return 0
+    wait $i
     # done
   done
   # done
