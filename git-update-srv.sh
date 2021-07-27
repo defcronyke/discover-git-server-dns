@@ -4,11 +4,13 @@
 #
 
 gc_dns_git_server_update_srv_records_git() {
-  cat db.git | grep "_git\._tcp" | sort | uniq | tee db.git.next.tmp
+  cat db.git | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee db.git.next.tmp
   
-  # if [ "basename $(echo "$PWD")" != "gitcid" ]; then
-  cat /etc/bind/db.git | grep "_git\._tcp" | sort | uniq | tee -a db.git.next.tmp
-  # fi
+  cat /etc/bind/db.git 2>/dev/null | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.next.tmp
+
+  for i in "$@"; do
+    echo "_git._tcp  IN      SRV     5 10 1234 $i." | tee -a db.git.next.tmp
+  done
     
   for i in "${gc_update_servers[@]}"; do
     echo "_git._tcp  IN      SRV     $i" | tee -a db.git.next.tmp
@@ -20,8 +22,8 @@ gc_dns_git_server_update_srv_records_git() {
 
   cp -f db.git db.git.bak
 
-  cat db.git | grep -v "_git\._tcp" | tee db.git.tmp
-  cat db.git.next | sort | uniq | tee -a db.git.tmp
+  cat db.git | grep -vP "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
+  cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
   mv db.git.tmp db.git
 
   rm db.git.next.tmp
@@ -38,15 +40,23 @@ gc_dns_git_server_update_srv_records() {
   for i in "$@"; do
     # echo "$i"
     for k in "$(./git-srv.sh "$i")"; do
-      gc_update_servers+=( "$(echo "$k" | grep " 1234 ")" )
+      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.$")" )
     done
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
-    gc_update_servers_hostnames+=( "$i" )
+
+    gc_server_hostname="$(echo "$i" | grep -v -e "^[[:space:]]*$")"
+
+    dig +timeout=2 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+    sed 's/;; connection timed out; no servers could be reached//g' | \
+    grep -v -e '^[[:space:]]*$'
+    if [ $? -eq 0 ]; then
+      gc_update_servers_hostnames+=( "$gc_server_hostname" )
+    fi
   done
 
-  for i in "${gc_update_servers[@]}"; do
-    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
-  done
+  # for i in "${gc_update_servers[@]}"; do
+  #   gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
+  # done
 
   # echo "${gc_update_servers_hostnames[@]}"
 
@@ -56,18 +66,20 @@ gc_dns_git_server_update_srv_records() {
 
   current_dir="$PWD"
 
-  for i in ${gc_update_servers_hostnames[@]}; do
+  for i in "${gc_update_servers_hostnames[@]}"; do
     if [ ! -d "bind-${i}" ]; then
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
       cd "bind-${i}" && \
-      gc_dns_git_server_update_srv_records_git $@
+
+      gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
       
     else
       cd "bind-${i}" || continue
       git reset --hard HEAD
       # git fetch --all
       git pull
-      gc_dns_git_server_update_srv_records_git $@
+
+      gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
 
     cd "$current_dir"
