@@ -260,4 +260,4 @@ gc_dns_git_server_update_srv_records() {
 }
 
 gc_dns_git_server_update_srv_records $@
-gc_dns_git_server_update_srv_records $@
+# gc_dns_git_server_update_srv_records $@
