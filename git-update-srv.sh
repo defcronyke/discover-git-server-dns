@@ -32,17 +32,23 @@ gc_dns_git_server_update_srv_records_git() {
     
   # cd "$current_dir2"
 
+  cp -f db.git.tmp db.git.tmp2
+
   # Add NS records.
   for i in "$@"; do
-    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
+    cat db.git.tmp2 | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
+  cp -f db.git.tmp db.git.tmp2
+
   for i in ${gc_update_servers_hostnames[@]}; do
     # parsed_server="$(echo "$i" | awk '{print }')"
-    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
+    cat db.git.tmp2 | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
+
+  rm db.git.tmp2
 
   
   cat db.git.next | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | \
