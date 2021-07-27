@@ -213,25 +213,25 @@ gc_dns_git_server_update_srv_records() {
   gc_update_servers_hostnames=( )
 
   if [ -f "git-srv.sh" ]; then
-    while read k; do
+    while IFS= read -r k; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-    done <$(./git-srv.sh)
+    done <<< "$(./git-srv.sh)"
   elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-    while read k; do
+    while IFS= read -r k; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-    done<$($HOME/git-server/discover-git-server-dns/git-srv.sh)
+    done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"
   fi
 
   for i in $@; do
     # echo "$i"
     if [ -f "git-srv.sh" ]; then
-      while read k; do
+      while IFS= read -r k; do
         gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-      done<$(./git-srv.sh "$i")
+      done <<< "$(./git-srv.sh "$i")"
     elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-      while read k; do
+      while IFS= read -r k; do
         gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-      done<$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")
+      done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"
     fi
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
 
