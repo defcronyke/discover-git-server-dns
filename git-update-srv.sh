@@ -44,7 +44,7 @@ gc_dns_git_server_update_srv_records() {
     done
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
 
-    gc_server_hostname="$(echo "$i" | grep -v -e "^[[:space:]]*$")"
+    gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
 
     dig +timeout=2 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
     sed 's/;; connection timed out; no servers could be reached//g' | \
