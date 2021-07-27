@@ -16,11 +16,21 @@ discover_git_server_dns_install() {
   echo "Using template file: ./db.git.tmpl"
   echo ""
 
-  cat db.git.tmpl | \
-  sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
-  sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
-  sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
-  sudo tee /etc/bind/db.git
+  sudo ls /etc/bind/db.git >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo ""
+    echo "NOTICE: Installing new DNS zone file: /etc/bind/db.git"
+    echo ""
+    cat db.git.tmpl | \
+    sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
+    sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
+    sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
+    sudo tee /etc/bind/db.git
+  else
+    echo ""
+    echo "NOTICE: Not installing new DNS zone file because it was already installed: /etc/bind/db.git"
+    echo ""
+  fi
 
   # Activate the "db.git" zone file by including it 
   # in bind config file, if it's not activated yet: 
