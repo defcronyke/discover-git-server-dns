@@ -80,8 +80,8 @@ gc_dns_git_server_update_srv_records_git() {
     fi
 
     while read n; do
-      cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$")" >/dev/null || \
-      cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
       tee -a db.git.tmp
       # tee -a ../bind-${k}/db.git.tmp
     done <db.git
@@ -116,8 +116,8 @@ gc_dns_git_server_update_srv_records_git() {
     fi
 
     while read n; do
-      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$")" >/dev/null || \
-      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
       tee -a db.git.tmp2
     done <db.git
 
