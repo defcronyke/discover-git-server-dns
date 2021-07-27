@@ -25,6 +25,7 @@ discover_git_server_dns_install_main() {
 
   sudo cp -f db.git.tmpl /etc/bind/db.git.orig
 
+  echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      ns1" | sudo tee -a /etc/bind/db.git.orig
   # echo "@       IN      NS      ns2" | sudo tee -a /etc/bind/db.git.orig
