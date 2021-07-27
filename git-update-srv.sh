@@ -24,22 +24,41 @@ gc_dns_git_server_update_srv_records_git() {
 
   cat db.git | grep -vP "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
 
-  current_dir2="$PWD"
+  # current_dir2="$PWD"
 
-  cd "$current_dir"
+  # cd "$current_dir"
 
   # Add A records.
   for k in "${gc_update_servers_hostnames[@]}"; do
-    cd "bind-${k}"
-    
-    for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
-      cat ../"bind-${i}/db.git" | grep "$n" | tee -a db.git.tmp
-    done
+    # cd "bind-${k}"
 
-    cd "$current_dir"
+    while read n; do
+      cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+" | grep -v "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")" | \
+        tee -a ../bind-${k}/db.git.tmp
+    done <../bind-${k}/db.git
+
+    mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
+    rm ../bind-${k}/db.git.tmp
+
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" add .
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" commit -m "Add A records."
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" push
+
+    while read n; do
+      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+" | grep -v "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")" | \
+        tee -a db.git.tmp2
+    done <db.git.tmp
+
+    mv db.git.tmp2 db.git.tmp
+    rm db.git.tmp2
+    
+    # for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
+    # done
+
+    # cd "$current_dir"
   done
     
-  cd "$current_dir2"
+  # cd "$current_dir2"
 
   # Add NS records.
   for i in "$@"; do
@@ -112,4 +131,5 @@ gc_dns_git_server_update_srv_records() {
   cd "$current_dir"/..
 }
 
+gc_dns_git_server_update_srv_records $@
 gc_dns_git_server_update_srv_records $@
