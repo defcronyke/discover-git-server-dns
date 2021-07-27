@@ -241,11 +241,12 @@ gc_dns_git_server_update_srv_records() {
 
   if [ -f "git-srv.sh" ]; then
     while IFS= read -r k; do
-      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
+      # gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
     done <<< "$(./git-srv.sh)"
   elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
     while IFS= read -r k; do
-      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
     done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"
   fi
 
@@ -253,11 +254,11 @@ gc_dns_git_server_update_srv_records() {
     # echo "$i"
     if [ -f "git-srv.sh" ]; then
       while IFS= read -r k; do
-        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
       done <<< "$(./git-srv.sh "$i")"
     elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
       while IFS= read -r k; do
-        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
       done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"
     fi
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
@@ -275,7 +276,7 @@ gc_dns_git_server_update_srv_records() {
   done
 
   for i in "${gc_update_servers[@]}"; do
-    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
+    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//' | sed 's/\.git$//')" )
   done
 
   # echo "${gc_update_servers_hostnames[@]}"
@@ -296,7 +297,7 @@ gc_dns_git_server_update_srv_records() {
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
       cd "bind-${i}" || continue
       gc_dns_git_server_update_srv_records_git "$i"
-      gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+      gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
     else
       cd "bind-${i}" || continue
