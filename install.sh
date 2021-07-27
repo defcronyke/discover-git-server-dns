@@ -8,7 +8,8 @@ discover_git_server_dns_install() {
   echo ""
 
   sudo apt-get update && \
-  sudo apt-get install -y bind9 nmap
+  sudo apt-get install -y bind9
+  # sudo apt-get install -y bind9 nmap
 
   # Install zone file: /etc/bind/db.git
   echo ""
@@ -26,6 +27,11 @@ discover_git_server_dns_install() {
     sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
     sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
     sudo tee /etc/bind/db.git
+    
+    for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+      echo "@       IN      NS      $i" | sudo tee -a /etc/bind/db.git
+    done
+
   else
     echo ""
     echo "NOTICE: Not installing new DNS zone file because it was already installed: /etc/bind/db.git"
