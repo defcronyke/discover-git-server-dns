@@ -36,7 +36,7 @@ gc_dns_git_server_update_srv_records_git() {
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
-  for i in "${gc_update_servers_hostnames[@]}"; do
+  for i in ${gc_update_servers_hostnames[@]}; do
     # parsed_server="$(echo "$i" | awk '{print }')"
     cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
@@ -65,7 +65,7 @@ gc_dns_git_server_update_srv_records_git() {
 
   # Add A records.
   # for j in "$@"; do
-  for k in "${gc_update_servers_hostnames[@]}"; do
+  for k in ${gc_update_servers_hostnames[@]}; do
     mkdir -p $HOME/.ssh
     chmod 700 $HOME/.ssh
     ssh-keygen -F "$k" || ssh-keyscan "$k" >>$HOME/.ssh/known_hosts
@@ -135,7 +135,7 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  for k in "${gc_update_servers_hostnames[@]}"; do
+  for k in ${gc_update_servers_hostnames[@]}; do
     cd "$current_dir2"
 
     git reset --hard HEAD
@@ -213,35 +213,37 @@ gc_dns_git_server_update_srv_records() {
   gc_update_servers_hostnames=( )
 
   if [ -f "git-srv.sh" ]; then
-    for k in $(./git-srv.sh); do
+    while read k; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-    done
+    done <$(./git-srv.sh)
   elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-    for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"; do
+    while read k; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-    done
+    done<$($HOME/git-server/discover-git-server-dns/git-srv.sh)
   fi
 
   for i in $@; do
     # echo "$i"
     if [ -f "git-srv.sh" ]; then
-      for k in "$(./git-srv.sh "$i")"; do
+      while read k; do
         gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-      done
+      done<$(./git-srv.sh "$i")
     elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-      for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"; do
+      while read k; do
         gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-      done
+      done<$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")
     fi
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
 
-    gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
+    # gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
 
-    dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+    # dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +tries=1 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
     sed 's/;; connection timed out; no servers could be reached//g' | \
     grep -v -e '^[[:space:]]*$'
     if [ $? -eq 0 ]; then
-      gc_update_servers_hostnames+=( "$gc_server_hostname" )
+      gc_update_servers_hostnames+=( "$i" )
+      # gc_update_servers_hostnames+=( "$gc_server_hostname" )
     fi
   done
 
