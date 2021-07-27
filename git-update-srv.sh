@@ -23,11 +23,28 @@ gc_dns_git_server_update_srv_records_git() {
   cp -f db.git db.git.bak
 
   cat db.git | grep -vP "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
-  
+
+  current_dir2="$PWD"
+
+  cd "$current_dir"
+
+  # Add A records.
+  for k in "${gc_update_servers_hostnames[@]}"; do
+    cd "bind-${k}"
+    
+    for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
+      cat ../"bind-${i}/db.git" | grep "$n" | tee -a db.git.tmp
+    done
+
+    cd "$current_dir"
+  done
+    
+  cd "$current_dir2"
+
   # Add NS records.
   for i in "$@"; do
-    cat db.git.tmp | grep "@       IN      NS      $i." >/dev/null || \
-      echo "@       IN      NS      $i." | tee -a db.git.tmp
+    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.$" >/dev/null || \
+    echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
   
   cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
@@ -92,7 +109,7 @@ gc_dns_git_server_update_srv_records() {
     cd "$current_dir"
   done
 
-  cd ..
+  cd "$current_dir"/..
 }
 
 gc_dns_git_server_update_srv_records $@
