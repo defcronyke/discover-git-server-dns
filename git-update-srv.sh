@@ -52,10 +52,17 @@ gc_dns_git_server_update_srv_records_git() {
     while read n; do
       cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
       cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
-      tee -a ../bind-${k}/db.git.tmp
+      tee -a ../bind-${k}/db.git.tmp || \
+      git clone ${k}:~/git/etc/bind.git ../bind-${k}
+      # tee -a ../bind-${k}/db.git.tmp
     done <../bind-${k}/db.git
 
-    cat ../bind-${k}/db.git.tmp | tee -a ../bind-${k}/db.git
+
+    cat ../bind-${k}/db.git | grep -P "$(cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
+    cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
+
+    # cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
+
 
     # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
     rm ../bind-${k}/db.git.tmp
@@ -67,10 +74,11 @@ gc_dns_git_server_update_srv_records_git() {
     while read n; do
       cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
       cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
-        tee -a db.git.tmp2
+      tee -a db.git.tmp2
     done <db.git
 
-    cat db.git.tmp2 | tee -a db.git
+    cat db.git | grep -P "$(cat db.git.tmp2 | sed "s/^@/$k/g")" >/dev/null || \
+    cat db.git.tmp2 | sed "s/^@/$k/g" | tee -a db.git
 
     # mv db.git.tmp2 db.git
     rm db.git.tmp2
