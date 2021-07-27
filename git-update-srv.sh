@@ -26,7 +26,8 @@ gc_dns_git_server_update_srv_records_git() {
   
   # Add NS records.
   for i in "$@"; do
-    echo "@       IN      NS      $i." | tee -a db.git.tmp
+    cat db.git.tmp | grep "@       IN      NS      $i." >/dev/null || \
+      echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
   
   cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
@@ -52,7 +53,7 @@ gc_dns_git_server_update_srv_records() {
 
     gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
 
-    dig +timeout=2 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
     sed 's/;; connection timed out; no servers could be reached//g' | \
     grep -v -e '^[[:space:]]*$'
     if [ $? -eq 0 ]; then

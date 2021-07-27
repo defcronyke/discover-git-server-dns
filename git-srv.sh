@@ -10,14 +10,14 @@ gc_dns_git_server_list_servers_cleanup() {
 }
 
 gc_dns_git_server_list_servers_self() {
-  dig +timeout=2 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
+  dig +time=2 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
   sed 's/;; connection timed out; no servers could be reached//g' | \
   grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$"
 }
 
 gc_dns_git_server_list_servers_guess() {
   if [ $# -ge 1 ]; then
-    dig +timeout=2 +short +nocomments @git$1 _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +short +nocomments @git$1 _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" && \
         break
@@ -58,7 +58,7 @@ gc_dns_git_server_list_servers_all() {
         gc_found_hostnames+=( "$(echo "$k" | awk '{print $NF}' | sed 's/\.$//')" )
       done
 
-      dig +timeout=2 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
+      dig +time=2 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" && \
         gc_found_hostnames+=( "$i" )
