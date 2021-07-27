@@ -6,7 +6,7 @@
 tasks=( )
 
 gc_dns_git_server_list_servers_cleanup() {
-  for i in "${tasks[@]}"; do echo "cancelling task: $i"; kill $i; done; for i in $(jobs -p); do echo "cancelling task: $i"; kill $i; done
+  for i in ${tasks[@]}; do echo "cancelling task: $i"; kill $i; done; for i in $(jobs -p); do echo "cancelling task: $i"; kill $i; done
 }
 
 gc_dns_git_server_list_servers_self() {
@@ -41,9 +41,9 @@ gc_dns_git_server_list_servers_init() {
   done
 
   # while [ true ]; do
-  for i in "$(jobs -p)"; do
+  for i in $(jobs -p); do
     # for k in ${tasks[@]}; do
-    wait "$i" || \
+    wait $i || \
       return 0
     # done
   done
