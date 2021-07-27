@@ -213,7 +213,7 @@ gc_dns_git_server_update_srv_records() {
   gc_update_servers_hostnames=( )
 
   if [ -f "git-srv.sh" ]; then
-    for k in "$(./git-srv.sh)"; do
+    for k in $(./git-srv.sh); do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
     done
   elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
@@ -222,7 +222,7 @@ gc_dns_git_server_update_srv_records() {
     done
   fi
 
-  for i in "$@"; do
+  for i in $@; do
     # echo "$i"
     if [ -f "git-srv.sh" ]; then
       for k in "$(./git-srv.sh "$i")"; do
