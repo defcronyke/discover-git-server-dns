@@ -11,8 +11,6 @@ $TTL    604800
 ;
 @       IN      NS      ns1
 ns1		IN		A		{BIND_DB_GIT_IP_ADDR}
-git.   IN      A   {BIND_DB_GIT_IP_ADDR}
 {BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}
 @       IN      AAAA    ::1
 _git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}.
-_git._tcp  IN      SRV     5 10 1234 git.

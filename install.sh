@@ -36,8 +36,6 @@ discover_git_server_dns_install() {
       ((count++))
     done
 
-    echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git
-
   else
     echo ""
     echo "NOTICE: Not installing new DNS zone file because it was already installed: /etc/bind/db.git"
