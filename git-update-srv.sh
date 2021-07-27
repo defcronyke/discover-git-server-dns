@@ -35,6 +35,13 @@ gc_dns_git_server_update_srv_records_git() {
     cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
+
+  for i in "${gc_update_servers_hostnames[@]}"; do
+    parsed_server="$(echo "$i" | awk '{}')"
+    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.$" >/dev/null || \
+    echo "@       IN      NS      $i." | tee -a db.git.tmp
+  done
+
   
   cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
   mv db.git.tmp db.git
@@ -43,15 +50,71 @@ gc_dns_git_server_update_srv_records_git() {
   rm db.git.next
   # rm db.git.tmp
 
-  git add .; git commit -m "Update SRV records."
+  git add .; git commit -m "Update NS and SRV records."
 
   # git add .; git commit -m "Update SRV records."; git push
 
   current_dir2="$PWD"
   
 
+
+
+
+
   # Add A records.
   # for j in "$@"; do
+  for k in "$@"; do
+    # cd "bind-${k}"
+    cd ..
+
+    if [ ! -d "bind-${k}" ]; then
+      git clone ${k}:~/git/etc/bind.git bind-${k} && \
+      cd bind-${k}
+      if [ $? -ne 0 ]; then
+        echo ""
+        echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
+        echo ""
+        cd "$current_dir2"
+        continue
+      fi
+    else
+      cd bind-${k} && \
+      git reset --hard HEAD && \
+      git pull
+      if [ $? -ne 0 ]; then
+        echo ""
+        echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
+        echo ""
+        # cd "$current_dir2"
+        # continue
+      fi
+    fi
+
+    while read n; do
+      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      tee -a db.git.tmp
+      # tee -a ../bind-${k}/db.git.tmp
+    done <db.git
+
+
+    cat db.git | grep -P "$(cat db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
+    cat db.git.tmp | sed "s/^@/$(hostname)\./g" | tee -a db.git
+
+    # cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
+
+
+    # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
+    rm db.git.tmp
+
+    git add .
+    git commit -m "Update peer A records 1."
+    git push
+
+    cd "$current_dir2"
+  done
+
+
   for k in "${gc_update_servers_hostnames[@]}"; do
     # cd "bind-${k}"
     cd ..
@@ -97,10 +160,13 @@ gc_dns_git_server_update_srv_records_git() {
     rm db.git.tmp
 
     git add .
-    git commit -m "Update peer A records."
+    git commit -m "Update peer A records 2."
+    git push
 
     cd "$current_dir2"
   done
+
+
 
   for k in "${gc_update_servers_hostnames[@]}"; do
     cd "$current_dir2"
@@ -114,6 +180,21 @@ gc_dns_git_server_update_srv_records_git() {
       # cd "$current_dir2"
       # continue
     fi
+
+    cd ..
+
+    cd bind-${k} && \
+    git reset --hard HEAD && \
+    git pull
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
+      echo ""
+      # cd "$current_dir2"
+      # continue
+    fi
+
+    cd "$current_dir2"
 
     while read n; do
       cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
@@ -134,7 +215,7 @@ gc_dns_git_server_update_srv_records_git() {
   done
   # done
 
-  git add .; git commit -m "Update DNS records."; git push
+  git add .; git commit -m "Update A records."; git push
 }
 
 gc_dns_git_server_update_srv_records() {
