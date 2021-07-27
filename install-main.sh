@@ -31,7 +31,7 @@ discover_git_server_dns_install_main() {
 
   count=1
   for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-    if [ $i -eq 2 ]; then
+    if [ $count -eq 2 ]; then
       echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
     fi
 
@@ -44,6 +44,10 @@ discover_git_server_dns_install_main() {
     ((count++))
   done
 
+  if [ $count -eq 1 ]; then
+    echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
+  fi
+
   
   echo "{BIND_DB_GIT_HOSTNAME}       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
@@ -51,7 +55,7 @@ discover_git_server_dns_install_main() {
   
   count=1
   for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-    if [ $i -eq 2 ]; then
+    if [ $count -eq 2 ]; then
       echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
     fi
 
@@ -59,12 +63,16 @@ discover_git_server_dns_install_main() {
       echo "git${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
     fi
 
-    if [ $i -ne 1 ]; then
+    if [ $count -ne 1 ]; then
       echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
     fi
     
     ((count++))
   done
+
+  if [ $count -eq 1 ]; then
+    echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  fi
   
   echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
 
@@ -122,9 +130,15 @@ discover_git_server_dns_install_main() {
     true
   fi
 
-  res=$?
+  # Set system to use own DNS server in file: /etc/resolv.conf
+  cat /etc/systemd/resolved.conf | grep -P "^DNS=" || \
+  echo "DNS=127.0.0.1" | sudo tee -a /etc/systemd/resolved.conf
+
+  sudo systemctl enable systemd-resolved
+  sudo systemctl restart systemd-resolved
 
   sudo systemctl daemon-reload
+  res=$?
   echo ""
 
   return $res
