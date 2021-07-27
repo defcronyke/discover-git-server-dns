@@ -25,32 +25,52 @@ discover_git_server_dns_install_main() {
 
   sudo cp -f db.git.tmpl /etc/bind/db.git.orig
 
-  echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
-  echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
-  echo "@       IN      NS      ns1" | sudo tee -a /etc/bind/db.git.orig
+  # echo "@       IN      NS      ns1" | sudo tee -a /etc/bind/db.git.orig
   # echo "@       IN      NS      ns2" | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
 
-  count=2
+  count=1
   for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+    if [ $i -eq 2 ]; then
+      echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
+    fi
+
+    if [ "$(hostname)" != "git${count}" ]; then
+      echo "@       IN      NS      git${count}" | sudo tee -a /etc/bind/db.git.orig
+    fi
+
     echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git.orig
+    
     ((count++))
   done
 
-  echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
-  echo "ns1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
-  
-  # echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git.orig
-  
-  count=2
-  for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-    echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
-    ((count++))
-  done
   
   echo "{BIND_DB_GIT_HOSTNAME}       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
+  echo "ns1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  
+  count=1
+  for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+    if [ $i -eq 2 ]; then
+      echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+    fi
+
+    if [ "$(hostname)" != "git${count}" ]; then
+      echo "git${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
+    fi
+
+    if [ $i -ne 1 ]; then
+      echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
+    fi
+    
+    ((count++))
+  done
+  
   echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
 
+  # # IPv6 example
+  # echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git.orig
+  
   cat /etc/bind/db.git.orig | \
   sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
   sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
