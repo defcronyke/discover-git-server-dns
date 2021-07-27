@@ -210,7 +210,7 @@ gc_dns_git_server_update_srv_records() {
 
   for i in "$@"; do
     # echo "$i"
-    for k in "$(./git-srv.sh "$i")"; do
+    for k in "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
     done
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
