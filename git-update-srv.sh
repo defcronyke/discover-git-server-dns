@@ -43,42 +43,86 @@ gc_dns_git_server_update_srv_records_git() {
   rm db.git.next
   # rm db.git.tmp
 
-  git add .; git commit -m "Update SRV records."; git push
+  git add .; git commit -m "Update SRV records."
+
+  # git add .; git commit -m "Update SRV records."; git push
+
+  current_dir2="$PWD"
+  
 
   # Add A records.
+  # for j in "$@"; do
   for k in "${gc_update_servers_hostnames[@]}"; do
     # cd "bind-${k}"
+    cd ..
+
+    if [ ! -d "bind-${k}" ]; then
+      git clone ${k}:~/git/etc/bind.git bind-${k} && \
+      cd bind-${k}
+      if [ $? -ne 0 ]; then
+        echo ""
+        echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
+        echo ""
+        cd "$current_dir2"
+        continue
+      fi
+    else
+      cd bind-${k} && \
+      git reset --hard HEAD && \
+      git pull
+      if [ $? -ne 0 ]; then
+        echo ""
+        echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
+        echo ""
+        # cd "$current_dir2"
+        # continue
+      fi
+    fi
 
     while read n; do
-      cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
-      cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
-      tee -a ../bind-${k}/db.git.tmp || \
-      git clone ${k}:~/git/etc/bind.git ../bind-${k}
+      cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$")" >/dev/null || \
+      cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      tee -a db.git.tmp
       # tee -a ../bind-${k}/db.git.tmp
-    done <../bind-${k}/db.git
+    done <db.git
 
 
-    cat ../bind-${k}/db.git | grep -P "$(cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
-    cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
+    cat db.git | grep -P "$(cat db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
+    cat db.git.tmp | sed "s/^@/$(hostname)\./g" | tee -a db.git
 
     # cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
 
 
     # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
-    rm ../bind-${k}/db.git.tmp
+    rm db.git.tmp
 
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" add .
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" commit -m "Update peer A records."
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" push
+    git add .
+    git commit -m "Update peer A records."
+
+    cd "$current_dir2"
+  done
+
+  for k in "${gc_update_servers_hostnames[@]}"; do
+    cd "$current_dir2"
+
+    git reset --hard HEAD && \
+    git pull
+    if [ $? -ne 0 ]; then
+      echo ""
+      echo "ERROR: Failed pulling repo: ~/git/etc/bind.git"
+      echo ""
+      # cd "$current_dir2"
+      # continue
+    fi
 
     while read n; do
-      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+.+[[:space:]]+.+$")" >/dev/null || \
       cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
       tee -a db.git.tmp2
     done <db.git
 
     cat db.git | grep -P "$(cat db.git.tmp2 | sed "s/^@/$k/g")" >/dev/null || \
-    cat db.git.tmp2 | sed "s/^@/$k/g" | tee -a db.git
+    cat db.git.tmp2 | sed "s/^@/$k\./g" | tee -a db.git
 
     # mv db.git.tmp2 db.git
     rm db.git.tmp2
@@ -88,8 +132,9 @@ gc_dns_git_server_update_srv_records_git() {
 
     # cd "$current_dir"
   done
+  # done
 
-  git add .; git commit -m "Update A records."; git push
+  git add .; git commit -m "Update DNS records."; git push
 }
 
 gc_dns_git_server_update_srv_records() {
@@ -148,4 +193,4 @@ gc_dns_git_server_update_srv_records() {
 }
 
 gc_dns_git_server_update_srv_records $@
-gc_dns_git_server_update_srv_records $@
+# gc_dns_git_server_update_srv_records $@
