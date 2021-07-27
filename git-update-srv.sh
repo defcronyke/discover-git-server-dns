@@ -22,7 +22,7 @@ gc_dns_git_server_update_srv_records_git() {
 
   cp -f db.git db.git.bak
 
-  cat db.git | grep -vP "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
+  cat db.git | grep -vP "^_git\._tcp[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
 
   # current_dir2="$PWD"
 
@@ -32,25 +32,25 @@ gc_dns_git_server_update_srv_records_git() {
 
   # Add NS records.
   for i in "$@"; do
-    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.$" >/dev/null || \
+    cat db.git.tmp | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i\.$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
   for i in "${gc_update_servers_hostnames[@]}"; do
     parsed_server="$(echo "$i" | awk '{}')"
-    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.$" >/dev/null || \
+    cat db.git.tmp | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i\.$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
   
-  cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
+  cat db.git.next | grep -P "^_git\._tcp[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
   mv db.git.tmp db.git
 
   rm db.git.next.tmp
   rm db.git.next
   # rm db.git.tmp
 
-  git add .; git commit -m "Update NS and SRV records."
+  git add .; git commit -m "Update NS and SRV records."; git push -u origin master
 
   # git add .; git commit -m "Update SRV records."; git push
 
@@ -79,8 +79,8 @@ gc_dns_git_server_update_srv_records_git() {
       fi
     else
       cd bind-${k} && \
-      git reset --hard HEAD && \
-      git pull
+      git reset --hard HEAD
+      git pull origin master
       if [ $? -ne 0 ]; then
         echo ""
         echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
@@ -109,7 +109,7 @@ gc_dns_git_server_update_srv_records_git() {
 
     git add .
     git commit -m "Update peer A records 1."
-    git push
+    git push -u origin master
 
     cd "$current_dir2"
   done
@@ -131,8 +131,8 @@ gc_dns_git_server_update_srv_records_git() {
       fi
     else
       cd bind-${k} && \
-      git reset --hard HEAD && \
-      git pull
+      git reset --hard HEAD
+      git pull origin master
       if [ $? -ne 0 ]; then
         echo ""
         echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
@@ -161,7 +161,7 @@ gc_dns_git_server_update_srv_records_git() {
 
     git add .
     git commit -m "Update peer A records 2."
-    git push
+    git push -u origin master
 
     cd "$current_dir2"
   done
@@ -171,8 +171,8 @@ gc_dns_git_server_update_srv_records_git() {
   for k in "${gc_update_servers_hostnames[@]}"; do
     cd "$current_dir2"
 
-    git reset --hard HEAD && \
-    git pull
+    git reset --hard HEAD
+    git pull origin master
     if [ $? -ne 0 ]; then
       echo ""
       echo "ERROR: Failed pulling repo: ~/git/etc/bind.git"
@@ -184,8 +184,8 @@ gc_dns_git_server_update_srv_records_git() {
     cd ..
 
     cd bind-${k} && \
-    git reset --hard HEAD && \
-    git pull
+    git reset --hard HEAD
+    git pull origin master
     if [ $? -ne 0 ]; then
       echo ""
       echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
@@ -215,7 +215,7 @@ gc_dns_git_server_update_srv_records_git() {
   done
   # done
 
-  git add .; git commit -m "Update A records."; git push
+  git add .; git commit -m "Update A records."; git push -u origin master
 }
 
 gc_dns_git_server_update_srv_records() {
@@ -262,7 +262,7 @@ gc_dns_git_server_update_srv_records() {
       cd "bind-${i}" || continue
       git reset --hard HEAD
       # git fetch --all
-      git pull
+      git pull origin master
 
       gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
@@ -274,4 +274,4 @@ gc_dns_git_server_update_srv_records() {
 }
 
 gc_dns_git_server_update_srv_records $@
-# gc_dns_git_server_update_srv_records $@
+gc_dns_git_server_update_srv_records $@
