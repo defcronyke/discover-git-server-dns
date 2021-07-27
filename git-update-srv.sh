@@ -4,9 +4,9 @@
 #
 
 gc_dns_git_server_update_srv_records_git() {
-  cat db.git | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee db.git.next.tmp
+  cat db.git | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | tee db.git.next.tmp
   
-  cat /etc/bind/db.git 2>/dev/null | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.next.tmp
+  cat /etc/bind/db.git 2>/dev/null | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | tee -a db.git.next.tmp
 
   for i in "$@"; do
     echo "_git._tcp  IN      SRV     5 10 1234 $i." | tee -a db.git.next.tmp
@@ -22,7 +22,7 @@ gc_dns_git_server_update_srv_records_git() {
 
   cp -f db.git db.git.bak
 
-  cat db.git | grep -vP "^_git\._tcp[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
+  cat db.git | grep -vP "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | tee db.git.tmp
 
   # current_dir2="$PWD"
 
@@ -32,18 +32,20 @@ gc_dns_git_server_update_srv_records_git() {
 
   # Add NS records.
   for i in "$@"; do
-    cat db.git.tmp | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i\.$" >/dev/null || \
+    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
   for i in "${gc_update_servers_hostnames[@]}"; do
-    parsed_server="$(echo "$i" | awk '{}')"
-    cat db.git.tmp | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i\.$" >/dev/null || \
+    # parsed_server="$(echo "$i" | awk '{print }')"
+    cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+NS[[:space:]]+$i.*$" >/dev/null || \
     echo "@       IN      NS      $i." | tee -a db.git.tmp
   done
 
   
-  cat db.git.next | grep -P "^_git\._tcp[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
+  cat db.git.next | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | \
+  tee -a db.git.tmp
+  
   mv db.git.tmp db.git
 
   rm db.git.next.tmp
@@ -63,58 +65,6 @@ gc_dns_git_server_update_srv_records_git() {
 
   # Add A records.
   # for j in "$@"; do
-  for k in "$@"; do
-    # cd "bind-${k}"
-    cd ..
-
-    if [ ! -d "bind-${k}" ]; then
-      git clone ${k}:~/git/etc/bind.git bind-${k} && \
-      cd bind-${k}
-      if [ $? -ne 0 ]; then
-        echo ""
-        echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
-        echo ""
-        cd "$current_dir2"
-        continue
-      fi
-    else
-      cd bind-${k} && \
-      git reset --hard HEAD
-      git pull origin master
-      if [ $? -ne 0 ]; then
-        echo ""
-        echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
-        echo ""
-        # cd "$current_dir2"
-        # continue
-      fi
-    fi
-
-    while read n; do
-      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
-      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
-      tee -a db.git.tmp
-      # tee -a ../bind-${k}/db.git.tmp
-    done <db.git
-
-
-    cat db.git | grep -P "$(cat db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
-    cat db.git.tmp | sed "s/^@/$(hostname)\./g" | tee -a db.git
-
-    # cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
-
-
-    # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
-    rm db.git.tmp
-
-    git add .
-    git commit -m "Update peer A records 1."
-    git push -u origin master
-
-    cd "$current_dir2"
-  done
-
-
   for k in "${gc_update_servers_hostnames[@]}"; do
     # cd "bind-${k}"
     cd ..
@@ -143,15 +93,28 @@ gc_dns_git_server_update_srv_records_git() {
     fi
 
     while read n; do
-      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
-      cat ${current_dir2}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ${current_dir2}/db.git | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
       tee -a db.git.tmp
       # tee -a ../bind-${k}/db.git.tmp
     done <db.git
 
+    cat ${current_dir2}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+    cat ${current_dir2}/db.git | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
+    tee -a db.git.tmp
 
-    cat db.git | grep -P "$(cat db.git.tmp | sed "s/^@/$(hostname)/g")" >/dev/null || \
-    cat db.git.tmp | sed "s/^@/$(hostname)\./g" | tee -a db.git
+    cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+    cat db.git | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
+    tee -a db.git.tmp
+
+    cp -f db.git db.git.bak
+
+    mv db.git.tmp db.git
+
+    # cat ${current_dir2}/db.git | grep -P "^`hostname`.*[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" >/dev/null || \
+    
+    # cat db.git.tmp | grep -P "^`hostname`.*[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | sed "s/^.+\([[:space:]]+IN[[:space:]]+A[[:space:]]+.+\)$/`hostname`\.\1/g" | \
+    # tee -a db.git
 
     # cat ../bind-${k}/db.git.tmp | sed "s/^@/$(hostname)/g" | tee -a ../bind-${k}/db.git
 
@@ -160,7 +123,7 @@ gc_dns_git_server_update_srv_records_git() {
     rm db.git.tmp
 
     git add .
-    git commit -m "Update peer A records 2."
+    git commit -m "Update peer A records."
     git push -u origin master
 
     cd "$current_dir2"
@@ -196,17 +159,40 @@ gc_dns_git_server_update_srv_records_git() {
 
     cd "$current_dir2"
 
+
     while read n; do
-      cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
-      cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
-      tee -a db.git.tmp2
+      cat ./bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ./bind-${k}/db.git | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
+      tee -a db.git.tmp
+      # tee -a ../bind-${k}/db.git.tmp
     done <db.git
 
-    cat db.git | grep -P "$(cat db.git.tmp2 | sed "s/^@/$k/g")" >/dev/null || \
-    cat db.git.tmp2 | sed "s/^@/$k\./g" | tee -a db.git
+    cat ./bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+    cat ./bind-${k}/db.git | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
+    tee -a db.git.tmp
+
+    cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+    cat db.git | grep -P "$(echo "`hostname`" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" | \
+    tee -a db.git.tmp
+
+    cp -f db.git db.git.bak
+
+    mv db.git.tmp db.git
+
+
+    # while read n; do
+    #   cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+    #   cat ../bind-${k}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+    #   tee -a db.git.tmp2
+    # done <db.git
+
+    # cat db.git | grep -P "$(cat db.git.tmp2 | sed "s/^@/$k/g")" >/dev/null || \
+    # cat db.git.tmp2 | sed "s/^@/$k\./g" | tee -a db.git
 
     # mv db.git.tmp2 db.git
-    rm db.git.tmp2
+    rm db.git.tmp
+
+    git add .; git commit -m "Update A records."; git push -u origin master
     
     # for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
     # done
@@ -215,7 +201,7 @@ gc_dns_git_server_update_srv_records_git() {
   done
   # done
 
-  git add .; git commit -m "Update A records."; git push -u origin master
+  git add .; git commit -m "Update A records END."; git push -u origin master
 }
 
 gc_dns_git_server_update_srv_records() {
@@ -225,7 +211,7 @@ gc_dns_git_server_update_srv_records() {
   for i in "$@"; do
     # echo "$i"
     for k in "$(./git-srv.sh "$i")"; do
-      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.$")" )
+      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
     done
     # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
 
