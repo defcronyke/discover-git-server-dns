@@ -13,31 +13,35 @@ gc_dns_git_server_list_servers_self() {
   dig +time=2 +tries=1 +short +nocomments _git._tcp.git SRV 2>/dev/null | \
   sed 's/;; connection timed out; no servers could be reached//g' | \
   grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
-  res4=$?
+  # res4=$?
 
-  dig +time=2 +tries=1 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
-  sed 's/;; connection timed out; no servers could be reached//g' | \
-  grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
-  res5=$?
+  # dig +time=2 +tries=1 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
+  # sed 's/;; connection timed out; no servers could be reached//g' | \
+  # grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+  # res5=$?
 
-  if [ $res5 -eq 0 ]; then
-    if [ $res4 -ne 0 ]; then
-      return $res4
-    else
-      return $res5
-    fi
-  fi
+  # if [ $res5 -eq 0 ]; then
+  #   if [ $res4 -ne 0 ]; then
+  #     return $res4
+  #   else
+  #     return $res5
+  #   fi
+  # fi
 
-  return $res5
+  # return $res5
 }
 
 gc_dns_git_server_list_servers_guess() {
+  dig +time=2 +tries=1 +short +nocomments @git _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
   if [ $# -ge 1 ]; then
-    dig +time=2 +tries=1 +short +nocomments @git${1} _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +tries=1 +short +nocomments @ns${1} _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
   else
-    dig +time=2 +tries=1 +short +nocomments @git1 _git._tcp.git SRV 2>/dev/null | \
+    dig +time=2 +tries=1 +short +nocomments @ns1 _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
   fi
