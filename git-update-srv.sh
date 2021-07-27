@@ -23,6 +23,12 @@ gc_dns_git_server_update_srv_records_git() {
   cp -f db.git db.git.bak
 
   cat db.git | grep -vP "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | tee db.git.tmp
+  
+  # Add NS records.
+  for i in "$@"; do
+    echo "@       IN      NS      $i." | tee -a db.git.tmp
+  done
+  
   cat db.git.next | grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" | sort | uniq | tee -a db.git.tmp
   mv db.git.tmp db.git
 
@@ -30,7 +36,7 @@ gc_dns_git_server_update_srv_records_git() {
   rm db.git.next
   rm db.git.tmp
 
-  git add .; git commit -m "Update SRV records."; git push
+  git add .; git commit -m "Update DNS records."; git push
 }
 
 gc_dns_git_server_update_srv_records() {
