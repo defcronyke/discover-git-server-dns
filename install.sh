@@ -22,19 +22,36 @@ discover_git_server_dns_install() {
     echo ""
     echo "NOTICE: Installing new DNS zone file: /etc/bind/db.git"
     echo ""
-    cat db.git.tmpl | \
+
+    cat db.git.tmpl | sudo tee /etc/bind/db.git
+
+    count=1
+    for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+      echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git
+      ((count++))
+    done
+
+    echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git
+    
+    echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git
+    
+    count=1
+    for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+      echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git
+      ((count++))
+    done
+
+    echo "ns${count}       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git
+    
+    echo "{BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git
+    
+    echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git
+
+    cat /etc/bind/db.git | \
     sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
     sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
     sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
-    sudo tee /etc/bind/db.git
-
-    count=2
-    for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-      echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git
-      echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git
-
-      ((count++))
-    done
+    sudo tee -a /etc/bind/db.git
 
   else
     echo ""
