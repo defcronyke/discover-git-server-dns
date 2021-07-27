@@ -53,7 +53,7 @@ gc_dns_git_server_list_servers_init() {
   # count=0
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
     # echo "$n"
-    { gc_dns_git_server_list_servers_guess $n $@; res=$?; if [ $n -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then return $res; fi; } & tasks+=( "$!" )
+    { gc_dns_git_server_list_servers_guess $n $@; res=$?; if [ $n -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then return 12; fi; return $res; } & tasks+=( "$!" )
     ((n++))
   done
 
