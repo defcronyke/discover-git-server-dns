@@ -20,11 +20,15 @@ gc_dns_git_server_list_servers_self() {
   grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
   res5=$?
 
-  if [ $res4 -eq 0 ]; then
-    return $res4
-  else
-    return $res5
+  if [ $res5 -eq 0 ]; then
+    if [ $res4 -ne 0 ]; then
+      return $res4
+    else
+      return $res5
+    fi
   fi
+
+  return $res5
 }
 
 gc_dns_git_server_list_servers_guess() {
@@ -40,23 +44,23 @@ gc_dns_git_server_list_servers_guess() {
 }
 
 gc_dns_git_server_list_servers_init() {
-  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-4}
+  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-8}
   # GC_MIN_NUM_SERVERS_TO_TRY=${GC_MIN_NUM_SERVERS_TO_TRY:-2}
 
-  { gc_dns_git_server_list_servers_self $@ 1>&3 2>&4; return $?; } 3>&1 4>&2 & tasks+=( "$!" )
+  { gc_dns_git_server_list_servers_self $@; } & tasks+=( "$!" )
 
   n=1
   # count=0
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
     # echo "$n"
-    { gc_dns_git_server_list_servers_guess $n $@ 1>&3 2>&4; res=$?; if [ $n -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then return 12; else return $res; fi; } 3>&1 4>&2 & tasks+=( "$!" )
+    { gc_dns_git_server_list_servers_guess $n $@; res=$?; if [ $n -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then res=12; fi; } & tasks+=( "$!" )
     ((n++))
   done
 
   while [ true ]; do
     for k in ${tasks[@]}; do
       wait $k
-      if [ $? -eq 12 ]; then
+      if [ $res -eq 12 ]; then
         return 0
       fi
     done
@@ -76,12 +80,12 @@ gc_dns_git_server_list_servers_all() {
 
       dig +time=2 +tries=1 +short +nocomments _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
-      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" && \
         gc_found_hostnames+=( "$i" )
 
       dig +time=2 +tries=1 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
-      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" && \
         gc_found_hostnames+=( "$i" )
     done
 
