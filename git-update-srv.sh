@@ -287,14 +287,15 @@ gc_dns_git_server_update_srv_records() {
   current_dir="$PWD"
 
   for i in ${gc_update_servers_hostnames[@]}; do
+    cd "$current_dir"
     mkdir -p $HOME/.ssh
     chmod 700 $HOME/.ssh
     ssh-keygen -F "$i" || ssh-keyscan "$i" >>$HOME/.ssh/known_hosts
 
     if [ ! -d "bind-${i}" ]; then
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
-      cd "bind-${i}" && \
-
+      cd "bind-${i}" || continue
+      gc_dns_git_server_update_srv_records_git "$i"
       gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
       
     else
@@ -303,10 +304,11 @@ gc_dns_git_server_update_srv_records() {
       # git fetch --all
       git pull origin master
 
-      gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+      gc_dns_git_server_update_srv_records_git "$i"
+      # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
 
-    cd "$current_dir"
+    # cd "$current_dir"
   done
 
   cd "$current_dir"/..
