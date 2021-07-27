@@ -41,7 +41,7 @@ gc_dns_git_server_update_srv_records_git() {
 
   rm db.git.next.tmp
   rm db.git.next
-  rm db.git.tmp
+  # rm db.git.tmp
 
   git add .; git commit -m "Update SRV records."; git push
 
@@ -55,7 +55,9 @@ gc_dns_git_server_update_srv_records_git() {
       tee -a ../bind-${k}/db.git.tmp
     done <../bind-${k}/db.git
 
-    mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
+    cat ../bind-${k}/db.git.tmp | tee -a ../bind-${k}/db.git
+
+    # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
     rm ../bind-${k}/db.git.tmp
 
     git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" add .
@@ -68,7 +70,9 @@ gc_dns_git_server_update_srv_records_git() {
         tee -a db.git.tmp2
     done <db.git
 
-    mv db.git.tmp2 db.git
+    cat db.git.tmp2 | tee -a db.git
+
+    # mv db.git.tmp2 db.git
     rm db.git.tmp2
     
     # for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
