@@ -10,6 +10,10 @@ gc_dns_git_server_list_servers_cleanup() {
 }
 
 gc_dns_git_server_list_servers_self() {
+  dig +time=2 +tries=1 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
+  sed 's/;; connection timed out; no servers could be reached//g' | \
+  grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
   dig +time=2 +tries=1 +short +nocomments _git._tcp.git SRV 2>/dev/null | \
   sed 's/;; connection timed out; no servers could be reached//g' | \
   grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
@@ -37,27 +41,57 @@ gc_dns_git_server_list_servers_guess() {
       grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
 
   if [ $# -ge 1 ]; then
+    dig +time=2 +tries=1 +short +nocomments @git${1} _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
     dig +time=2 +tries=1 +short +nocomments @ns${1} _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
+    # if [ $# -ge $1 ]; then
+    n=0
+    for i in $@; do
+      if [ $n -lt $1 ]; then
+        ((n++))
+        continue
+      fi
+      dig +time=2 +tries=1 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+      break
+    done
+    # fi
+
+    if [ $1 -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then
+      return 12
+    fi
   else
+    dig +time=2 +tries=1 +short +nocomments @git1 _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
     dig +time=2 +tries=1 +short +nocomments @ns1 _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
       grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$"
+
+      return 12
   fi
+
+  return 0
 }
 
 gc_dns_git_server_list_servers_init() {
   GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-8}
   # GC_MIN_NUM_SERVERS_TO_TRY=${GC_MIN_NUM_SERVERS_TO_TRY:-2}
 
-  { gc_dns_git_server_list_servers_self $@; } & tasks+=( "$!" )
+  gc_dns_git_server_list_servers_self $@ & tasks+=( "$!" )
 
   n=1
   # count=0
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
     # echo "$n"
-    { gc_dns_git_server_list_servers_guess $n $@; res=$?; if [ $n -ge $GC_MAX_NUM_SERVERS_TO_TRY ]; then return 12; fi; return $res; } & tasks+=( "$!" )
+    gc_dns_git_server_list_servers_guess $n $@ & tasks+=( "$!" )
     ((n++))
   done
 
