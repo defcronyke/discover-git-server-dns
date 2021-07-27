@@ -9,7 +9,8 @@ $TTL    604800
                         2419200         ; Expire
                          604800 )       ; Negative Cache TTL
 ;
-@       IN      NS      {BIND_DB_GIT_HOSTNAME}.
+@       IN      NS      ns1
+ns1		IN		A		{BIND_DB_GIT_IP_ADDR}
 git.   IN      A   {BIND_DB_GIT_IP_ADDR}
 {BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}
 @       IN      AAAA    ::1
