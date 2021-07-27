@@ -6,39 +6,42 @@
 tasks=( )
 
 gc_dns_git_server_list_servers_cleanup() {
-  for i in ${tasks[@]}; do echo "cancelling task: $i"; kill $i; done; for i in $(jobs -p); do echo "cancelling task: $i"; kill $i; done
+  for i in "${tasks[@]}"; do echo "cancelling task: $i"; kill $i; done; for i in $(jobs -p); do echo "cancelling task: $i"; kill $i; done
 }
 
 gc_dns_git_server_list_servers_self() {
+  dig +time=2 +short +nocomments _git._tcp.git SRV 2>/dev/null | \
+  sed 's/;; connection timed out; no servers could be reached//g' | \
+  grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$"
+
   dig +time=2 +short +nocomments @$(hostname) _git._tcp.git SRV 2>/dev/null | \
   sed 's/;; connection timed out; no servers could be reached//g' | \
-  grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$"
+  grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$"
 }
 
 gc_dns_git_server_list_servers_guess() {
   if [ $# -ge 1 ]; then
     dig +time=2 +short +nocomments @git$1 _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
-      grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" && \
-        break
+      grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$"
   fi
 }
 
 gc_dns_git_server_list_servers_init() {
-  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-100}
+  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-10}
 
   trap 'gc_dns_git_server_list_servers_cleanup $@; return 2;' INT
 
-  { gc_dns_git_server_list_servers_self $@; } & tasks+=( "$!" )
+  { gc_dns_git_server_list_servers_self $@; return $?; } & tasks+=( "$!" )
 
   n=1
   while [ $n -le $GC_MAX_NUM_SERVERS_TO_TRY ]; do
-    { gc_dns_git_server_list_servers_guess $n $@; } & tasks+=( "$!" )
+    { gc_dns_git_server_list_servers_guess $n $@; return $?; } & tasks+=( "$!" )
     ((n++))
   done
 
   # while [ true ]; do
-  for i in $(jobs -p); do
+  for i in "$(jobs -p)"; do
     # for k in ${tasks[@]}; do
     wait "$i" || \
       return 0
@@ -58,9 +61,14 @@ gc_dns_git_server_list_servers_all() {
         gc_found_hostnames+=( "$(echo "$k" | awk '{print $NF}' | sed 's/\.$//')" )
       done
 
+      dig +time=2 +short +nocomments _git._tcp.git SRV 2>/dev/null | \
+      sed 's/;; connection timed out; no servers could be reached//g' | \
+      grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" && \
+        gc_found_hostnames+=( "$i" )
+
       dig +time=2 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
       sed 's/;; connection timed out; no servers could be reached//g' | \
-      grep -P "^_git\._tcp\.*.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+\.$" && \
+      grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" && \
         gc_found_hostnames+=( "$i" )
     done
 
