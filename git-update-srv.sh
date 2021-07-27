@@ -27,36 +27,6 @@ gc_dns_git_server_update_srv_records_git() {
   # current_dir2="$PWD"
 
   # cd "$current_dir"
-
-  # Add A records.
-  for k in "${gc_update_servers_hostnames[@]}"; do
-    # cd "bind-${k}"
-
-    while read n; do
-      cat db.git.tmp | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+" | grep -v "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")" | \
-        tee -a ../bind-${k}/db.git.tmp
-    done <../bind-${k}/db.git
-
-    mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
-    rm ../bind-${k}/db.git.tmp
-
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" add .
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" commit -m "Add A records."
-    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" push
-
-    while read n; do
-      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+" | grep -v "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")" | \
-        tee -a db.git.tmp2
-    done <db.git.tmp
-
-    mv db.git.tmp2 db.git.tmp
-    rm db.git.tmp2
-    
-    # for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
-    # done
-
-    # cd "$current_dir"
-  done
     
   # cd "$current_dir2"
 
@@ -73,7 +43,41 @@ gc_dns_git_server_update_srv_records_git() {
   rm db.git.next
   rm db.git.tmp
 
-  git add .; git commit -m "Update DNS records."; git push
+  git add .; git commit -m "Update SRV records."; git push
+
+  # Add A records.
+  for k in "${gc_update_servers_hostnames[@]}"; do
+    # cd "bind-${k}"
+
+    while read n; do
+      cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+      tee -a ../bind-${k}/db.git.tmp
+    done <../bind-${k}/db.git
+
+    mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
+    rm ../bind-${k}/db.git.tmp
+
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" add .
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" commit -m "Update peer A records."
+    git --git-dir="${PWD}/../bind-${k}/.git" --work-tree="${PWD}/../bind-${k}" push
+
+    while read n; do
+      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | grep -P "$(echo "$n" | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$")" >/dev/null || \
+      cat ../bind-${k}/db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" | \
+        tee -a db.git.tmp2
+    done <db.git
+
+    mv db.git.tmp2 db.git
+    rm db.git.tmp2
+    
+    # for n in "$(cat db.git | grep -P "^.+[[:space:]]+IN[[:space:]]+A[[:space:]]+.+")"; do
+    # done
+
+    # cd "$current_dir"
+  done
+
+  git add .; git commit -m "Update A records."; git push
 }
 
 gc_dns_git_server_update_srv_records() {
