@@ -66,6 +66,10 @@ gc_dns_git_server_update_srv_records_git() {
   # Add A records.
   # for j in "$@"; do
   for k in "${gc_update_servers_hostnames[@]}"; do
+    mkdir -p $HOME/.ssh
+    chmod 700 $HOME/.ssh
+    ssh-keygen -F "$k" || ssh-keyscan "$k" >>$HOME/.ssh/known_hosts
+
     # cd "bind-${k}"
     cd ..
 
@@ -238,6 +242,10 @@ gc_dns_git_server_update_srv_records() {
   current_dir="$PWD"
 
   for i in "${gc_update_servers_hostnames[@]}"; do
+    mkdir -p $HOME/.ssh
+    chmod 700 $HOME/.ssh
+    ssh-keygen -F "$i" || ssh-keyscan "$i" >>$HOME/.ssh/known_hosts
+
     if [ ! -d "bind-${i}" ]; then
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
       cd "bind-${i}" && \
