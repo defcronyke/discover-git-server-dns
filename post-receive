@@ -5,7 +5,8 @@ gc_dns_post_receive_update_bind_config() {
 
   sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind reset --hard HEAD
   # sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind fetch --all
-  sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind pull origin master && \
+  sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind pull origin master
+
   sudo systemctl try-restart bind9 || \
   sudo systemctl try-restart named
 
@@ -22,11 +23,11 @@ gc_dns_post_receive_update_bind_config() {
     if [ -f "${HOME}/git-server/discover-git-server-dns/git-update-srv.sh" ]; then
       cd ${HOME}/git-server/discover-git-server-dns
       git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" pull origin master
-      ${HOME}/git-server/discover-git-server-dns/git-update-srv.sh "$(hostname)"
+      ${HOME}/git-server/discover-git-server-dns/git-update-srv.sh
       cd "$current_dir3"
     elif [ -f "git-update-srv.sh" ]; then
       git pull origin master
-      git-update-srv.sh "$(hostname)"
+      ./git-update-srv.sh
     fi
   fi
 
