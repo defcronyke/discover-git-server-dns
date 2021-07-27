@@ -23,35 +23,35 @@ discover_git_server_dns_install() {
     echo "NOTICE: Installing new DNS zone file: /etc/bind/db.git"
     echo ""
 
-    cat db.git.tmpl | sudo tee /etc/bind/db.git
+    cp -f db.git.tmpl /etc/bind/db.git.orig
 
     count=1
     for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-      echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git
+      echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git.orig
       ((count++))
     done
 
-    echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git
+    echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git.orig
     
-    echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git
+    echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git.orig
     
     count=1
     for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-      echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git
+      echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
       ((count++))
     done
 
-    echo "ns${count}       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git
+    echo "ns${count}       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
     
-    echo "{BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git
+    echo "{BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
     
-    echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git
+    echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git.orig
 
-    cat /etc/bind/db.git | \
+    cat /etc/bind/db.git.orig | \
     sed "s/{BIND_DB_GIT_SERIAL}/$(echo "`date +%Y%m%d`$(echo $RANDOM | tail -c 3)")/g" | \
     sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
     sed "s/{BIND_DB_GIT_IP_ADDR}/$(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')/g" | \
-    sudo tee -a /etc/bind/db.git
+    sudo tee /etc/bind/db.git
 
   else
     echo ""
