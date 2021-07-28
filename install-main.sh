@@ -121,6 +121,15 @@ discover_git_server_dns_install_main() {
     sudo systemctl restart bind9 2>/dev/null || \
     sudo systemctl restart named 2>/dev/null || \
     true
+
+    # sudo systemctl enable systemd-resolved; \
+    # sudo systemctl restart systemd-resolved || \
+    # true
+
+    sudo systemctl enable bind9-resolvconf; \
+    sudo systemctl restart bind9-resolvconf || \
+    true
+
   else
     echo "NOTICE: Not enabling bind9.service because there was already some DNS service running."
     echo ""
@@ -128,16 +137,50 @@ discover_git_server_dns_install_main() {
     sudo systemctl try-restart bind9 2>/dev/null || \
     sudo systemctl try-restart named 2>/dev/null || \
     true
+
+    # sudo systemctl restart systemd-resolved || \
+    # true
+
+    sudo systemctl restart bind9-resolvconf; \
+    sudo systemctl enable bind9-resolvconf || \
+    true
   fi
 
-  # Set system to use own DNS server in file: /etc/resolv.conf
-  cat /etc/systemd/resolved.conf | grep -P "^DNS=" || \
-  echo "DNS=127.0.0.1" | sudo tee -a /etc/systemd/resolved.conf
-
-  sudo systemctl enable systemd-resolved
-  sudo systemctl restart systemd-resolved
-
+  # Set DNS options. These options will probably change later.
+  # TODO: Set the correct subnets automatically.
+  if [ -f "/etc/bind/named.conf.options.orig" ]; then \
+    sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.bak && \
+    sudo cp -f /etc/bind/named.conf.options.orig /etc/bind/named.conf.options && \
+    sudo cp -f /etc/bind/named.conf.options.bak /etc/bind/named.conf.options.bak2; \
+  else \
+    sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.orig; \
+  fi; \
+  sudo sed -i '$i\
+\
+        version "not currently available";\
+        recursion yes;\
+        allow-recursion { 192.168.1.224; 127.0.0.1; 192.168.1.0/24; 10.8.0.0/24; 10.9.0.0/24; };\
+        querylog yes;\
+        forwarders {\
+          192.168.1.224;\
+          10.8.0.40;\
+          192.168.1.3;\
+        };' \
+  /etc/bind/named.conf.options; \
+  sudo cp -f /etc/systemd/resolved.conf /etc/systemd/resolved.conf.orig; \
+  sudo sed -i "s/^\#*DNS=.*$/DNS=192.168.1.224/g" /etc/systemd/resolved.conf; \
+  sudo sed -i "s/^\#*Domains=.*$/Domains=git/g" /etc/systemd/resolved.conf; \
+  sudo sed -i "s/^\#*name_servers=.*/name_servers=192.168.1.224/g" /etc/resolvconf.conf; \
+  sudo sed -i "s/^nameserver $/nameserver=192.168.1.224/g" /etc/resolvconf/run/resolv.conf; \
+  sudo sed -i "s/^search $/search git/g" /etc/resolvconf/run/resolv.conf; \
+  sudo systemctl enable bind9-resolvconf; \
+  sudo systemctl restart bind9-resolvconf; \
+  true; \
+  sudo systemctl restart bind9 2>/dev/null || \
+  sudo systemctl restart named 2>/dev/null || \
+  true; \
   sudo systemctl daemon-reload
+
   res=$?
   echo ""
 
