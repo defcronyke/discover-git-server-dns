@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Install git server bind DNS-based 
 # service discovery features.
 

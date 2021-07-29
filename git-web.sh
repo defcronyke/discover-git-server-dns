@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # If your GitWeb servers take extra time 
 # to respond, you can increase this value

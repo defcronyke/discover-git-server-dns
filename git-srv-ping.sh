@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Get all A records for zone "git" from any DNS server
 # which responds to broadcast pings on our network.
 #

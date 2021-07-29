@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for i in "`./git-web.sh`"; do
 	last="$i"
@@ -34,4 +34,3 @@ for i in "`./git-web.sh`"; do
 		done
 	#fi
 done
-
