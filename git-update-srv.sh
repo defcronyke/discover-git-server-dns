@@ -90,7 +90,7 @@ gc_dns_git_server_update_srv_records_git() {
   for k in ${gc_update_servers_hostnames[@]}; do
     mkdir -p ${HOME}/.ssh
     chmod 700 ${HOME}/.ssh
-    ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
+    # ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
 
     if [ "$k" == "$(hostname)" ]; then
       continue
@@ -301,7 +301,7 @@ gc_dns_git_server_update_srv_records() {
     
     mkdir -p "${HOME}/.ssh"
     chmod 700 "${HOME}/.ssh"
-    ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
+    # ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
 
     gc_ssh_host="$(echo "$i" | cut -d@ -f2)"
 
@@ -327,17 +327,17 @@ gc_dns_git_server_update_srv_records() {
     # TODO: DO WE NEED THIS HERE? OR THE SAME ONE ABOVE IS A BETTER PLACE FOR IT?
     mkdir -p "${HOME}/.ssh"
     chmod 700 "${HOME}/.ssh"
-    ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
+    # ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
 
     # TODO: DO WE NEED THIS?
     mkdir -p "${HOME}/.ssh"
     chmod 700 "${HOME}/.ssh"
-    ssh-keygen -F "${gc_ssh_username}@${gc_ssh_host}" || ssh-keyscan "${gc_ssh_username}@${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
+    # ssh-keygen -F "${gc_ssh_username}@${gc_ssh_host}" || ssh-keyscan "${gc_ssh_username}@${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     # TODO: OR DO WE NEED THIS INSTEAD?
     mkdir -p "${HOME}/.ssh"
     chmod 700 "${HOME}/.ssh"
-    ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
+    # ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     if [ ! -d "bind-${i}" ]; then
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
