@@ -88,9 +88,13 @@ gc_dns_git_server_update_srv_records_git() {
   # Add A records.
   # for j in "$@"; do
   for k in ${gc_update_servers_hostnames[@]}; do
-    mkdir -p $HOME/.ssh
-    chmod 700 $HOME/.ssh
-    ssh-keygen -F "$k" || ssh-keyscan "$k" >>$HOME/.ssh/known_hosts
+    mkdir -p ${HOME}/.ssh
+    chmod 700 ${HOME}/.ssh
+    ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
+
+    if [ "$k" == "$(hostname)" ]; then
+      continue
+    fi
 
     # cd "bind-${k}"
     cd ..
@@ -289,9 +293,50 @@ gc_dns_git_server_update_srv_records() {
 
   for i in ${gc_update_servers_hostnames[@]}; do
     cd "$current_dir"
-    mkdir -p $HOME/.ssh
-    chmod 700 $HOME/.ssh
-    ssh-keygen -F "$i" || ssh-keyscan "$i" >>$HOME/.ssh/known_hosts
+
+    if [ "$i" == "$(hostname)" ]; then
+      continue
+    fi
+    
+    mkdir -p "${HOME}/.ssh"
+    chmod 700 "${HOME}/.ssh"
+    ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
+
+    gc_ssh_host="$(echo "$i" | cut -d@ -f2)"
+
+    echo "$i" | grep "@" >/dev/null
+    if [ $? -eq 0 ]; then
+      gc_ssh_username="$(echo "$i" | cut -d@ -f1)"
+    else
+      gc_ssh_username="$(cat "${HOME}/.ssh/config" | grep -A2 -P "^Host ${gc_ssh_host}$" | tail -n1 | awk '{print $NF}')"
+    fi
+
+    if [ -z "$gc_ssh_username" ]; then
+      echo ""
+      echo "INFO: No ssh config for user found. Trying Raspberry Pi auto-config..."
+      echo ""
+
+      .gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
+
+      # gitcid_install_new_git_server_rpi_auto_provision "$gc_ssh_host"
+
+      # gc_ssh_username="$USER"
+    fi
+
+    # TODO: DO WE NEED THIS HERE? OR THE SAME ONE ABOVE IS A BETTER PLACE FOR IT?
+    mkdir -p "${HOME}/.ssh"
+    chmod 700 "${HOME}/.ssh"
+    ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
+
+    # TODO: DO WE NEED THIS?
+    mkdir -p "${HOME}/.ssh"
+    chmod 700 "${HOME}/.ssh"
+    ssh-keygen -F "${gc_ssh_username}@${gc_ssh_host}" || ssh-keyscan "${gc_ssh_username}@${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
+
+    # TODO: OR DO WE NEED THIS INSTEAD?
+    mkdir -p "${HOME}/.ssh"
+    chmod 700 "${HOME}/.ssh"
+    ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     if [ ! -d "bind-${i}" ]; then
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
