@@ -242,6 +242,7 @@ gc_dns_git_server_update_srv_records_git() {
 gc_dns_git_server_update_srv_records() {
   gc_update_servers=( )
   gc_update_servers_hostnames=( )
+  GITCID_DIR=${GITCID_DIR:-"${PWD}/.gc/"}
 
   if [ -f "git-srv.sh" ]; then
     while IFS= read -r k; do
@@ -316,7 +317,7 @@ gc_dns_git_server_update_srv_records() {
       echo "INFO: No ssh config for user found. Trying Raspberry Pi auto-config..."
       echo ""
 
-      .gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
+      ${GITCID_DIR}.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
 
       # gitcid_install_new_git_server_rpi_auto_provision "$gc_ssh_host"
 
