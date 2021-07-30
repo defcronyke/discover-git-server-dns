@@ -245,6 +245,8 @@ gc_dns_git_server_update_srv_records_git() {
 
   git add .; git commit -m "Update A records END."; git push -u origin master
   # git add .; git commit -m "Update A records END."; git pull origin master; git push -u origin master
+
+  return 0
 }
 
 gc_dns_git_server_update_srv_records() {
@@ -367,6 +369,8 @@ gc_dns_git_server_update_srv_records() {
   done
 
   cd "$current_dir"/..
+
+  return 0
 }
 
 gc_dns_git_server_update_srv_records $@
