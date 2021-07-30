@@ -55,7 +55,7 @@ discover_git_server_dns_install_main() {
   echo "ns1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
   count=1
-  for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
+  for i in $(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}'); do
    
 
     if [ "$(hostname)" != "git${count}" ]; then
