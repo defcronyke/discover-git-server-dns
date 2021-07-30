@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # 
 # Update SRV records on all detected git servers.
 #
