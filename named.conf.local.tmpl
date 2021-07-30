@@ -1,4 +1,24 @@
+
+
+include "/etc/bind/zones.rfc1918";
+
+
+zone "localhost" {
+        type master;
+        file "/etc/bind/db.git";
+};
+
+zone "{BIND_DB_GIT_HOSTNAME}" {
+        type master;
+        file "/etc/bind/db.git";
+};
+
 zone "git" {
+        type master;
+        file "/etc/bind/db.git";
+};
+
+zone "ns1" {
         type master;
         file "/etc/bind/db.git";
 };

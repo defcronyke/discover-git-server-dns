@@ -27,7 +27,15 @@ discover_git_server_dns_install_main() {
 
   # echo "@       IN      NS      ns1" | sudo tee -a /etc/bind/db.git.orig
   # echo "@       IN      NS      ns2" | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      git1." | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      ns." | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      ns" | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      ns1." | sudo tee -a /etc/bind/db.git.orig
+  echo "@       IN      NS      localhost." | sudo tee -a /etc/bind/db.git.orig
 
   count=1
   for i in $(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}'); do
@@ -37,23 +45,34 @@ discover_git_server_dns_install_main() {
 
     echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git.orig
 
-    if [ $count -eq 1 ]; then
-      echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
-    fi
+    # if [ $count -eq 1 ]; then
+    #   echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
+    # fi
     
     ((count++))
   done
 
-  if [ $count -eq 1 ]; then
-    echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
-  fi
+  # if [ $count -eq 1 ]; then
+  #   echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
+  # fi
 
   # echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
   
+  echo "{BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   echo "{BIND_DB_GIT_HOSTNAME}       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  echo "localhost.       IN      A       127.0.0.1" | sudo tee -a /etc/bind/db.git.orig
   
-  echo "ns1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  echo "git.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  echo "git       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+
+  echo "ns.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  echo "ns       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+
+  echo "ns1.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  echo "git1.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
+  echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+
   count=1
   for i in $(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}'); do
    
@@ -66,20 +85,20 @@ discover_git_server_dns_install_main() {
       echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
     fi
 
-     if [ $count -eq 1 ]; then
-      echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
-    fi
+    # if [ $count -eq 1 ]; then
+    #   echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+    # fi
     
     ((count++))
   done
 
-  if [ $count -eq 1 ]; then
-    echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
-  fi
+  # if [ $count -eq 1 ]; then
+  #   echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  # fi
   
-  echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
+  echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git.orig
 
-  echo "_git._tcp  IN      SRV     5 10 1234 git" | sudo tee -a /etc/bind/db.git.orig
+  # echo "_git._tcp  IN      SRV     5 10 1234 git" | sudo tee -a /etc/bind/db.git.orig
 
   # # IPv6 example
   # echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git.orig
@@ -104,10 +123,20 @@ discover_git_server_dns_install_main() {
   echo "by including it in bind config file: /etc/bind/named.conf.local"
   echo ""
 
-  sudo grep /etc/bind/named.conf.local -e "zone \"git\"" >/dev/null
+  sudo grep /etc/bind/named.conf.local -e "zone \"$(hostname)\"" >/dev/null
   if [ $? -ne 0 ]; then
     echo ""
-    cat named.conf.local.tmpl | sudo tee -a /etc/bind/named.conf.local
+
+    if [ ! -f "/etc/bind/named.conf.local.orig" ]; then
+      sudo cp -f /etc/bind/named.conf.local /etc/bind/named.conf.local.orig
+    fi
+
+    sudo cp -f /etc/bind/named.conf.local /etc/bind/named.conf.local.bak
+
+    cat named.conf.local.tmpl | \
+    sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
+    sudo tee /etc/bind/named.conf.local
+
     echo ""
   else
     echo ""
@@ -127,28 +156,36 @@ discover_git_server_dns_install_main() {
     sudo systemctl restart named 2>/dev/null || \
     true
 
+    sudo systemctl daemon-reload
+
     # sudo systemctl enable systemd-resolved; \
     # sudo systemctl restart systemd-resolved || \
     # true
 
-    sudo systemctl enable bind9-resolvconf; \
-    sudo systemctl restart bind9-resolvconf || \
-    true
+    # sudo systemctl enable bind9-resolvconf; \
+    # sudo systemctl restart bind9-resolvconf || \
+    # true
 
   else
     echo "NOTICE: Not enabling bind9.service because there was already some DNS service running."
     echo ""
 
-    sudo systemctl try-restart bind9 2>/dev/null || \
-    sudo systemctl try-restart named 2>/dev/null || \
+    sudo systemctl restart bind9 2>/dev/null || \
+    sudo systemctl restart named 2>/dev/null || \
     true
+
+    sudo systemctl daemon-reload
+
+    # sudo systemctl try-restart bind9 2>/dev/null || \
+    # sudo systemctl try-restart named 2>/dev/null || \
+    # true
 
     # sudo systemctl restart systemd-resolved || \
     # true
 
-    sudo systemctl restart bind9-resolvconf; \
-    sudo systemctl enable bind9-resolvconf || \
-    true
+    # sudo systemctl restart bind9-resolvconf; \
+    # sudo systemctl enable bind9-resolvconf || \
+    # true
   fi
 
   # Set DNS options. These options will probably change later.
@@ -163,14 +200,8 @@ discover_git_server_dns_install_main() {
   sudo sed -i '$i\
 \
         version "not currently available";\
-        recursion yes;\
-        allow-recursion { 192.168.1.224; 127.0.0.1; 192.168.1.0/24; 10.8.0.0/24; 10.9.0.0/24; };\
         querylog yes;\
-        forwarders {\
-          192.168.1.224;\
-          10.8.0.40;\
-          192.168.1.3;\
-        };' \
+' \
   /etc/bind/named.conf.options; \
   sudo cp -f /etc/systemd/resolved.conf /etc/systemd/resolved.conf.orig; \
   sudo sed -i "s/^\#*DNS=.*$/DNS=192.168.1.224/g" /etc/systemd/resolved.conf; \
@@ -178,9 +209,6 @@ discover_git_server_dns_install_main() {
   sudo sed -i "s/^\#*name_servers=.*/name_servers=192.168.1.224/g" /etc/resolvconf.conf; \
   sudo sed -i "s/^nameserver $/nameserver=192.168.1.224/g" /etc/resolvconf/run/resolv.conf; \
   sudo sed -i "s/^search $/search git/g" /etc/resolvconf/run/resolv.conf; \
-  sudo systemctl enable bind9-resolvconf; \
-  sudo systemctl restart bind9-resolvconf; \
-  true; \
   sudo systemctl restart bind9 2>/dev/null || \
   sudo systemctl restart named 2>/dev/null || \
   true; \
