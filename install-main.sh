@@ -188,36 +188,33 @@ discover_git_server_dns_install_main() {
     # true
   fi
 
-  # Set DNS options. These options will probably change later.
-  # TODO: Set the correct subnets automatically.
-  if [ -f "/etc/bind/named.conf.options.orig" ]; then \
-    sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.bak && \
-    sudo cp -f /etc/bind/named.conf.options.orig /etc/bind/named.conf.options && \
-    sudo cp -f /etc/bind/named.conf.options.bak /etc/bind/named.conf.options.bak2; \
-  else \
-    sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.orig; \
-  fi; \
-  sudo sed -i '$i\
-\
-        version "not currently available";\
-        querylog yes;\
-' \
-  /etc/bind/named.conf.options; \
-  sudo cp -f /etc/systemd/resolved.conf /etc/systemd/resolved.conf.orig; \
-  sudo sed -i "s/^\#*DNS=.*$/DNS=192.168.1.224/g" /etc/systemd/resolved.conf; \
-  sudo sed -i "s/^\#*Domains=.*$/Domains=git/g" /etc/systemd/resolved.conf; \
-  sudo sed -i "s/^\#*name_servers=.*/name_servers=192.168.1.224/g" /etc/resolvconf.conf; \
-  sudo sed -i "s/^nameserver $/nameserver=192.168.1.224/g" /etc/resolvconf/run/resolv.conf; \
-  sudo sed -i "s/^search $/search git/g" /etc/resolvconf/run/resolv.conf; \
+#   # Set DNS options.
+#   if [ -f "/etc/bind/named.conf.options.orig" ]; then \
+#     sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.bak && \
+#     sudo cp -f /etc/bind/named.conf.options.orig /etc/bind/named.conf.options && \
+#     sudo cp -f /etc/bind/named.conf.options.bak /etc/bind/named.conf.options.bak2; \
+#   else \
+#     sudo cp -f /etc/bind/named.conf.options /etc/bind/named.conf.options.orig; \
+#   fi; \
+#   sudo sed -i '$i\
+# \
+#         version "not currently available";\
+#         querylog yes;\
+# ' \
+#   /etc/bind/named.conf.options; \
+
+  # Activate new bind DNS config.
   sudo systemctl restart bind9 2>/dev/null || \
   sudo systemctl restart named 2>/dev/null || \
   true; \
+
   sudo systemctl daemon-reload
 
-  res=$?
+  # res=$?
   echo ""
 
-  return $res
+  return 0
+  # return $res
 }
 
 discover_git_server_dns_install_main $@
