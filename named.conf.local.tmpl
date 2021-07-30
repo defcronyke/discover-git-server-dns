@@ -13,12 +13,22 @@ zone "{BIND_DB_GIT_HOSTNAME}" {
         file "/etc/bind/db.git";
 };
 
+zone "git1" {
+        type master;
+        file "/etc/bind/db.git";
+};
+
 zone "git" {
         type master;
         file "/etc/bind/db.git";
 };
 
 zone "ns1" {
+        type master;
+        file "/etc/bind/db.git";
+};
+
+zone "ns" {
         type master;
         file "/etc/bind/db.git";
 };
