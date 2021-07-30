@@ -68,13 +68,17 @@ gc_dns_git_server_update_srv_records_git() {
   cat db.git.next | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sort | uniq | \
   tee -a db.git.tmp
   
-  mv db.git.tmp db.git
+  cp -f db.git.tmp db.git
+
+  # mv db.git.tmp db.git
 
   rm db.git.next.tmp
   rm db.git.next
   # rm db.git.tmp
 
-  git add .; git commit -m "Update NS and SRV records."; git pull origin master; git push -u origin master
+  git add .; git commit -m "Update NS and SRV records."; git push -u origin master
+
+  # git add .; git commit -m "Update NS and SRV records."; git pull origin master; git push -u origin master
 
   # git add .; git commit -m "Update SRV records."; git push
 
@@ -143,7 +147,8 @@ gc_dns_git_server_update_srv_records_git() {
 
     cp -f db.git db.git.bak
 
-    mv db.git.tmp db.git
+    cp -f db.git.tmp db.git
+    # mv db.git.tmp db.git
 
     # cat ${current_dir2}/db.git | grep -P "^`hostname`.*[[:space:]]+IN[[:space:]]+A[[:space:]]+.+$" >/dev/null || \
     
@@ -154,11 +159,13 @@ gc_dns_git_server_update_srv_records_git() {
 
 
     # mv ../bind-${k}/db.git.tmp ../bind-${k}/db.git
-    rm db.git.tmp
+    
+    
+    # rm db.git.tmp
 
     git add .
     git commit -m "Update peer A records."
-    git pull origin master
+    # git pull origin master
     git push -u origin master
 
     cd "$current_dir2"
@@ -236,7 +243,8 @@ gc_dns_git_server_update_srv_records_git() {
   # done
   # done
 
-  git add .; git commit -m "Update A records END."; git pull origin master; git push -u origin master
+  git add .; git commit -m "Update A records END."; git push -u origin master
+  # git add .; git commit -m "Update A records END."; git pull origin master; git push -u origin master
 }
 
 gc_dns_git_server_update_srv_records() {

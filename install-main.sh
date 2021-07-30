@@ -30,24 +30,25 @@ discover_git_server_dns_install_main() {
   echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
 
   count=1
-  for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-    if [ $count -eq 2 ]; then
-      echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
-    fi
-
+  for i in $(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}'); do
     if [ "$(hostname)" != "git${count}" ]; then
       echo "@       IN      NS      git${count}" | sudo tee -a /etc/bind/db.git.orig
     fi
 
     echo "@       IN      NS      ns${count}" | sudo tee -a /etc/bind/db.git.orig
+
+    if [ $count -eq 1 ]; then
+      echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
+    fi
     
     ((count++))
   done
 
   if [ $count -eq 1 ]; then
-    echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
+    echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
   fi
 
+  # echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
   
   echo "{BIND_DB_GIT_HOSTNAME}       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
@@ -55,9 +56,7 @@ discover_git_server_dns_install_main() {
   
   count=1
   for i in "$(cat /etc/resolv.conf | grep "nameserver" | awk '{print $NF}')"; do
-    if [ $count -eq 2 ]; then
-      echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
-    fi
+   
 
     if [ "$(hostname)" != "git${count}" ]; then
       echo "git${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
@@ -65,6 +64,10 @@ discover_git_server_dns_install_main() {
 
     if [ $count -ne 1 ]; then
       echo "ns${count}       IN      A      $i" | sudo tee -a /etc/bind/db.git.orig
+    fi
+
+     if [ $count -eq 1 ]; then
+      echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
     fi
     
     ((count++))
@@ -75,6 +78,8 @@ discover_git_server_dns_install_main() {
   fi
   
   echo "_git._tcp  IN      SRV     5 10 1234 {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
+
+  echo "_git._tcp  IN      SRV     5 10 1234 git" | sudo tee -a /etc/bind/db.git.orig
 
   # # IPv6 example
   # echo "@       IN      AAAA    ::1" | sudo tee -a /etc/bind/db.git.orig
