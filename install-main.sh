@@ -165,18 +165,18 @@ discover_git_server_dns_install_main() {
     sudo tee /etc/bind/named.conf.local
 
     if [ "$(hostname)" != "raspberrypi" ]; then
-      echo 'zone "raspberrypi" {\
-        type master;\
-        file "/etc/bind/db.git";\
-};\
+      echo 'zone "raspberrypi" {
+        type master;
+        file "/etc/bind/db.git"
+};
 '     | sudo tee -a /etc/bind/named.conf.local
     fi
 
     if [ "$(hostname)" != "git1" ]; then
-      echo 'zone "git1" {\
-        type master;\
-        file "/etc/bind/db.git";\
-};\
+      echo 'zone "git1" {
+        type master;
+        file "/etc/bind/db.git";
+};
 '     | sudo tee -a /etc/bind/named.conf.local
     fi
 
