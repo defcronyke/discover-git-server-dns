@@ -45,6 +45,14 @@ discover_git_server_dns_git_web() {
   done
 
   echo "$(for i in ${GC_ACTIVE_GIT_SERVERS[@]}; do echo "$i"; done)" | grep -v -e "^[[:space:]]*$" | sort | uniq
+
+  if [ -z "$GC_ACTIVE_GIT_SERVERS" ]; then
+    gc_git_web_output_res=1
+  else
+    gc_git_web_output_res=0
+  fi
+
+  return $gc_git_web_output_res
 }
 
 discover_git_server_dns_git_web
