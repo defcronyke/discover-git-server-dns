@@ -9,12 +9,12 @@ gc_dns_git_server_update_srv_records_git() {
   cp -f db.git db.git.next.tmp2
   # cp -f /etc/bind/db.git db.git.next.tmp3
 
-  rm db.git.next.tmp
+  rm db.git.next.tmp 2>/dev/null
 
   cat db.git.next.tmp2 | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | \
   tee -a db.git.next.tmp
 
-  rm db.git.next.tmp2
+  # rm db.git.next.tmp2
   
   # cat db.git.next.tmp3 | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+[[:space:]]+.+$" | sort | uniq | \
   # tee -a db.git.next.tmp
@@ -39,6 +39,9 @@ gc_dns_git_server_update_srv_records_git() {
 
   cat db.git.next.tmp2 | grep -vP "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | \
   tee -a db.git.tmp
+
+
+  rm db.git.next.tmp2
 
   # current_dir2="$PWD"
 
@@ -65,16 +68,18 @@ gc_dns_git_server_update_srv_records_git() {
   rm db.git.tmp2
 
   
-  cat db.git.next | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sort | uniq | \
+  cat db.git.next.tmp | grep -P "^_git\._tcp.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sort | uniq | \
   tee -a db.git.tmp
+
+  # cat db.git.next.tmp
   
   cp -f db.git.tmp db.git
 
   # mv db.git.tmp db.git
 
   rm db.git.next.tmp
-  rm db.git.next
-  # rm db.git.tmp
+  # rm db.git.next
+  rm db.git.tmp
 
   git add .; git commit -m "Update NS and SRV records."; git push -u origin master
 
