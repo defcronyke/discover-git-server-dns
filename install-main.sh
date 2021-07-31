@@ -163,7 +163,8 @@ discover_git_server_dns_install_main() {
     sudo tee /etc/bind/named.conf.local
 
     if [ "$(hostname)" != "raspberrypi" ]; then
-      echo 'zone "raspberrypi" {
+      echo '
+zone "raspberrypi" {
         type master;
         file "/etc/bind/db.git"
 };
