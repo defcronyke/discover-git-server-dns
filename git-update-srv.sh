@@ -333,6 +333,8 @@ gc_dns_git_server_update_srv_records() {
 
       rm .gc/.gc-last-update-check.txt
 
+      git pull origin master
+
       source <(curl -sL https://tinyurl.com/gitcid) -e
 
       echo ""
