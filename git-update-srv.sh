@@ -331,7 +331,7 @@ gc_dns_git_server_update_srv_records() {
 
       rm ${GITCID_DIR}.gc-last-update-check.txt 2>/dev/null
 
-      ${GITCID_DIR}init.sh -h
+      source <(curl -sL https://tinyurl.com/gitcid) -e
 
 
       echo ""
