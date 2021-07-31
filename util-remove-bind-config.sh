@@ -23,7 +23,7 @@ discover_git_server_dns_util_remove_bind_config() {
 
   cd /etc/bind || return 1
 
-  sudo systemctl disable bind9 2>/dev/null; sudo systemctl stop bind9 2>/dev/null; sudo rm -rf .git 2>/dev/null; sudo rm db.git 2>/dev/null; echo "" | sudo tee named.conf.local 2>/dev/null; sudo rm -rf ~/git/etc/bind.git 2>/dev/null
+  sudo systemctl disable bind9 2>/dev/null; sudo systemctl stop bind9 2>/dev/null; sudo rm -rf .git 2>/dev/null; sudo rm db.git 2>/dev/null; echo "" | sudo tee named.conf.local >/dev/null 2>&1; sudo rm -rf ~/git/etc/bind.git 2>/dev/null
 
   cd "$current_dir_before_bind_cleanup"
 
