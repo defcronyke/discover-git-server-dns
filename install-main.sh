@@ -29,9 +29,24 @@ discover_git_server_dns_install_main() {
   # echo "@       IN      NS      ns2" | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      {BIND_DB_GIT_HOSTNAME}" | sudo tee -a /etc/bind/db.git.orig
+
+  if [ "$(hostname)" != "raspberrypi" ]; then
+    echo "@       IN      NS      raspberrypi." | sudo tee -a /etc/bind/db.git.orig
+  fi
+
+  echo "@       IN      NS      raspberrypi" | sudo tee -a /etc/bind/db.git.orig
+
+  echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
+
   echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
-  echo "@       IN      NS      git1." | sudo tee -a /etc/bind/db.git.orig
+  
+  if [ "$(hostname)" != "git1" ]; then
+    echo "@       IN      NS      git1." | sudo tee -a /etc/bind/db.git.orig
+  fi
+
+  echo "@       IN      NS      git1" | sudo tee -a /etc/bind/db.git.orig
+
   echo "@       IN      NS      ns." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      ns" | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      ns1." | sudo tee -a /etc/bind/db.git.orig
@@ -61,6 +76,12 @@ discover_git_server_dns_install_main() {
   echo "{BIND_DB_GIT_HOSTNAME}.       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   echo "{BIND_DB_GIT_HOSTNAME}       IN      A       {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   echo "localhost.       IN      A       127.0.0.1" | sudo tee -a /etc/bind/db.git.orig
+
+  if [ "$(hostname)" != "raspberrypi" ]; then
+    echo "raspberrypi.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  fi
+
+  echo "raspberrypi       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
   echo "git.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   echo "git       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
@@ -71,7 +92,10 @@ discover_git_server_dns_install_main() {
   echo "ns1.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   echo "ns1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
-  echo "git1.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  if [ "$(hostname)" != "git1" ]; then
+    echo "git1.       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
+  fi
+  
   echo "git1       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
   
   echo "@       IN      A      {BIND_DB_GIT_IP_ADDR}" | sudo tee -a /etc/bind/db.git.orig
@@ -139,6 +163,24 @@ discover_git_server_dns_install_main() {
     cat named.conf.local.tmpl | \
     sed "s/{BIND_DB_GIT_HOSTNAME}/$(hostname)/g" | \
     sudo tee /etc/bind/named.conf.local
+
+    if [ "$(hostname)" != "raspberrypi" ]; then
+      echo 'zone "raspberrypi" {\
+        type master;\
+        file "/etc/bind/db.git";\
+};\
+'     | sudo tee -a /etc/bind/named.conf.local
+    fi
+
+    if [ "$(hostname)" != "git1" ]; then
+      echo 'zone "git1" {\
+        type master;\
+        file "/etc/bind/db.git";\
+};\
+'     | sudo tee -a /etc/bind/named.conf.local
+    fi
+
+    echo ""
 
     echo ""
   else
