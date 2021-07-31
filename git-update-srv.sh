@@ -67,8 +67,8 @@ gc_dns_git_server_update_srv_records_git() {
   
   current_dir2="$PWD"
 
-  for k in ${gc_update_servers_hostnames[@]}; do
-    cd "$current_dir2"
+  for k in $@; do
+    # cd "$current_dir2"
 
     if [ -z "$k" ]; then
       echo ".. SKIPPING BECAUSE BLANK: $k"
@@ -85,40 +85,40 @@ gc_dns_git_server_update_srv_records_git() {
 
     # ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
 
-    cd ..
+    # cd ..
 
-    if [ ! -d "bind-${k}" ]; then
-      git clone ${k}:~/git/etc/bind.git bind-${k} && \
-      cd "bind-${k}"
-      if [ $? -ne 0 ]; then
-        echo ""
-        echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
-        echo ""
-        continue
-      fi
-    else
-      cd "bind-${k}" || continue
-      git reset --hard HEAD
-      git pull origin master
-      if [ $? -ne 0 ]; then
-        echo ""
-        echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
-        echo ""
-      fi
-    fi
+    # if [ ! -d "bind-${k}" ]; then
+    #   git clone ${k}:~/git/etc/bind.git bind-${k} && \
+    #   cd "bind-${k}"
+    #   if [ $? -ne 0 ]; then
+    #     echo ""
+    #     echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
+    #     echo ""
+    #     continue
+    #   fi
+    # else
+    #   cd "bind-${k}" || continue
+    #   git reset --hard HEAD
+    #   git pull origin master
+    #   if [ $? -ne 0 ]; then
+    #     echo ""
+    #     echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
+    #     echo ""
+    #   fi
+    # fi
 
-    git remote add upstream ~/git/etc/bind.git || \
-    git remote set-url upstream ~/git/etc/bind.git
+    # git remote add upstream ~/git/etc/bind.git || \
+    # git remote set-url upstream ~/git/etc/bind.git
 
-    git remote add git ~/git/etc/bind.git || \
-    git remote set-url git ~/git/etc/bind.git
+    # git remote add git ~/git/etc/bind.git || \
+    # git remote set-url git ~/git/etc/bind.git
 
-    git remote add $(hostname) ~/git/etc/bind.git || \
-    git remote set-url $(hostname) ~/git/etc/bind.git
+    git remote add $k ${k}:~/git/etc/bind.git || \
+    git remote set-url $k ${k}:~/git/etc/bind.git
 
-    git fetch upstream --all
+    git fetch --all
 
-    git merge upstream master; git push -u origin master
+    git pull $k master; git push -u origin master
 
     if [ $? -ne 0 ]; then
       git reset --hard HEAD
@@ -177,7 +177,7 @@ gc_dns_git_server_update_srv_records() {
     # gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
 
     # dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
-    dig +time=2 +tries=1 +short +nocomments @$i _git._tcp.git SRV 2>/dev/null | \
+    dig +time=1 +tries=3 +short +nocomments @$i _git._tcp SRV 2>/dev/null | \
     sed 's/;; connection timed out; no servers could be reached//g' | \
     grep -v -e '^[[:space:]]*$'
     if [ $? -eq 0 ]; then
@@ -192,7 +192,7 @@ gc_dns_git_server_update_srv_records() {
 
   # echo "${gc_update_servers_hostnames[@]}"
 
-  rm -rf workdir
+  # rm -rf workdir
   mkdir -p workdir
   cd workdir
 
@@ -295,10 +295,11 @@ gc_dns_git_server_update_srv_records() {
     else
       cd "bind-${i}" || continue
       git reset --hard HEAD
-      # git fetch --all
+      git fetch --all
       git pull origin master
 
       gc_dns_git_server_update_srv_records_git "$i"
+      gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
 
