@@ -113,6 +113,9 @@ gc_dns_git_server_update_srv_records_git() {
     # git remote add git ~/git/etc/bind.git || \
     # git remote set-url git ~/git/etc/bind.git
 
+    git remote add upstream ~/git/etc/bind.git || \
+    git remote set-url upstream ~/git/etc/bind.git
+
     git remote add $k ${k}:~/git/etc/bind.git || \
     git remote set-url $k ${k}:~/git/etc/bind.git
 
