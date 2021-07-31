@@ -37,8 +37,6 @@ discover_git_server_dns_install_main() {
   echo "@       IN      NS      raspberrypi" | sudo tee -a /etc/bind/db.git.orig
 
   echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
-
-  echo "@       IN      NS      git." | sudo tee -a /etc/bind/db.git.orig
   echo "@       IN      NS      git" | sudo tee -a /etc/bind/db.git.orig
   
   if [ "$(hostname)" != "git1" ]; then
