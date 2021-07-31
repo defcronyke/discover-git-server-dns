@@ -254,6 +254,8 @@ gc_dns_git_server_update_srv_records() {
   gc_update_servers_hostnames=( )
   GITCID_DIR=${GITCID_DIR:-"${PWD}/.gc/"}
 
+  git pull origin master
+
   if [ -f "git-srv.sh" ]; then
     while IFS= read -r k; do
       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
@@ -324,8 +326,20 @@ gc_dns_git_server_update_srv_records() {
 
     if [ -z "$gc_ssh_username" ]; then
       echo ""
+      echo "INFO: Triggering GitCid update, because maybe it's needed..."
+      echo ""
+
+      rm ${GITCID_DIR}.gc-last-update-check.txt 2>/dev/null
+
+      ${GITCID_DIR}init.sh -h
+
+
+      echo ""
       echo "INFO: No ssh config for user found. Trying Raspberry Pi auto-config..."
       echo ""
+
+      
+
 
       ${GITCID_DIR}.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
 
