@@ -329,9 +329,13 @@ gc_dns_git_server_update_srv_records() {
       echo "INFO: Triggering GitCid update, because maybe it's needed..."
       echo ""
 
+      cd ..
+
       rm ${GITCID_DIR}.gc-last-update-check.txt 2>/dev/null
 
       source <(curl -sL https://tinyurl.com/gitcid) -e
+
+      cd workdir
 
 
       echo ""
