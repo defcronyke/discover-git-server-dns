@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 
 # Update SRV records on all detected git servers.
 #
@@ -95,13 +95,15 @@ gc_dns_git_server_update_srv_records_git() {
     mkdir -p ${HOME}/.ssh
     chmod 700 ${HOME}/.ssh
     # ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
+    
+    cd ..
 
     if [ "$k" == "$(hostname)" ]; then
+      cd "$current_dir2"
       continue
     fi
 
     # cd "bind-${k}"
-    cd ..
 
     if [ ! -d "bind-${k}" ]; then
       git clone ${k}:~/git/etc/bind.git bind-${k} && \
