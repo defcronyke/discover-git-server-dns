@@ -166,7 +166,7 @@ discover_git_server_dns_install_main() {
       echo '
 zone "raspberrypi" {
         type master;
-        file "/etc/bind/db.git"
+        file "/etc/bind/db.git";
 };
 '     | sudo tee -a /etc/bind/named.conf.local
     fi
