@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #-----------------------------
 #
@@ -20,6 +20,8 @@
 discover_git_server_dns_util_remove_bind_config() {
 
   current_dir_before_bind_cleanup="$PWD"
+
+  echo "$PWD"
 
   cd /etc/bind
 
