@@ -355,14 +355,41 @@ gc_dns_git_server_update_srv_records() {
     chmod 700 "${HOME}/.ssh"
     # ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
 
+    touch "${HOME}/.ssh/known_hosts"
+    chmod 600 "${HOME}/.ssh/known_hosts"
+
+    touch "${HOME}/.ssh/config"
+    chmod 600 "${HOME}/.ssh/config"
+
+    touch "${HOME}/.ssh/authorized_keys"
+    chmod 600 "${HOME}/.ssh/authorized_keys"
+
+    sed -i "/^${i}\s.*$/d" "${HOME}/.ssh/known_hosts"; \
+    sed -i '/^$/d' "${HOME}/.ssh/known_hosts"
+
+
+    echo ""
+    echo "Adding peer git-server key to local ssh config: \"${HOME}/.ssh/git-server.key\" >> \"${HOME}/.ssh/config\""
+    cat "${HOME}/.ssh/config" | grep -P "^Host $i" >/dev/null || printf "%b\n" "\nHost ${i}\n\tHostName ${i}\n\tUser ${gc_ssh_username}\n\tIdentityFile ~/.ssh/git-server.key\n\tIdentitiesOnly yes\n" | tee -a "${HOME}/.ssh/config" >/dev/null
+    echo ""
+    echo "Added peer key to local \"${HOME}/.ssh/config\" for host: ${gc_ssh_username}@${i}"
+
+
+    echo ""
+    echo "Verifying peer host: $i"
+    echo ""
+
+    ssh-keygen -F "$i" || ssh-keyscan "$i" | tee -a "${HOME}/.ssh/known_hosts" >/dev/null
+
+
     # TODO: DO WE NEED THIS?
-    mkdir -p "${HOME}/.ssh"
-    chmod 700 "${HOME}/.ssh"
+    # mkdir -p "${HOME}/.ssh"
+    # chmod 700 "${HOME}/.ssh"
     # ssh-keygen -F "${gc_ssh_username}@${gc_ssh_host}" || ssh-keyscan "${gc_ssh_username}@${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     # TODO: OR DO WE NEED THIS INSTEAD?
-    mkdir -p "${HOME}/.ssh"
-    chmod 700 "${HOME}/.ssh"
+    # mkdir -p "${HOME}/.ssh"
+    # chmod 700 "${HOME}/.ssh"
     # ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     if [ ! -d "bind-${i}" ]; then
