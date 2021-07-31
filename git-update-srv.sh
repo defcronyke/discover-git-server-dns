@@ -331,21 +331,17 @@ gc_dns_git_server_update_srv_records() {
 
       cd ..
 
-      rm ${GITCID_DIR}.gc-last-update-check.txt 2>/dev/null
+      rm .gc/.gc-last-update-check.txt
 
       source <(curl -sL https://tinyurl.com/gitcid) -e
-
-      cd workdir
-
 
       echo ""
       echo "INFO: No ssh config for user found. Trying Raspberry Pi auto-config..."
       echo ""
 
-      
+      .gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
 
-
-      ${GITCID_DIR}.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
+      cd workdir
 
       # gitcid_install_new_git_server_rpi_auto_provision "$gc_ssh_host"
 
