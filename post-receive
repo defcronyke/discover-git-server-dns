@@ -3,8 +3,8 @@
 gc_dns_post_receive_update_bind_config() {
 	echo "Invoked git hook: ${BASH_SOURCE[0]} $@"
 
-  if [ $UID -ne 0 ]; then
-    # current_dir3="$PWD"
+  # if [ $UID -ne 0 ]; then
+  #   # current_dir3="$PWD"
 
 
     echo "hostname=$(hostname)"
@@ -12,16 +12,16 @@ gc_dns_post_receive_update_bind_config() {
     echo "USER=$(whoami)"
     echo ""
 
-    sudo chown -R $USER: "${PWD}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
-    sudo chown -R $USER: * 2>/dev/null
-    sudo chown -R $USER: ./* 2>/dev/null
-    sudo chown -R $USER: ./ 2>/dev/null
-    sudo chown -R $USER: . 2>/dev/null
-  fi
+    # sudo chown -R $USER: "${PWD}" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
+    # sudo chown -R $USER: * 2>/dev/null
+    # sudo chown -R $USER: ./* 2>/dev/null
+    # sudo chown -R $USER: ./ 2>/dev/null
+    # sudo chown -R $USER: . 2>/dev/null
+  # fi
 
   # echo "hostname=$(hostname)"
   # echo ""
@@ -38,9 +38,9 @@ gc_dns_post_receive_update_bind_config() {
   # sudo chown -R $USER: ./ 2>/dev/null
   # sudo chown -R $USER: . 2>/dev/null
 
-  sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind reset --hard HEAD
-  # sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind fetch --all
-  sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind pull origin master
+  # sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind reset --hard HEAD
+  # # sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind fetch --all
+  # sudo git --git-dir=/etc/bind/.git --work-tree=/etc/bind pull origin master
 
   sudo systemctl try-restart bind9 || \
   sudo systemctl try-restart named
@@ -54,20 +54,20 @@ gc_dns_post_receive_update_bind_config() {
     current_dir3="$PWD"
 
 
-    echo "hostname=$(hostname)"
-    echo ""
-    echo "USER=$(whoami)"
-    echo ""
+    # echo "hostname=$(hostname)"
+    # echo ""
+    # echo "USER=$(whoami)"
+    # echo ""
 
-    sudo chown -R $USER: "${PWD}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
-    sudo chown -R $USER: * 2>/dev/null
-    sudo chown -R $USER: ./* 2>/dev/null
-    sudo chown -R $USER: ./ 2>/dev/null
-    sudo chown -R $USER: . 2>/dev/null
+    # sudo chown -R $USER: "${PWD}" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
+    # sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
+    # sudo chown -R $USER: * 2>/dev/null
+    # sudo chown -R $USER: ./* 2>/dev/null
+    # sudo chown -R $USER: ./ 2>/dev/null
+    # sudo chown -R $USER: . 2>/dev/null
 
 
 
@@ -75,37 +75,38 @@ gc_dns_post_receive_update_bind_config() {
     # git --git-dir=~/git-server/discover-git-server-dns/.git --work-tree=~/git-server/discover-git-server-dns fetch --all
 
     if [ -f "${HOME}/git-server/discover-git-server-dns/git-update-srv.sh" ]; then
-      cd ${HOME}/git-server/discover-git-server-dns
+      cd "${HOME}/git-server/discover-git-server-dns"
       git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" pull origin master
-      ${HOME}/git-server/discover-git-server-dns/git-update-srv.sh
+      ./git-update-srv.sh
       cd "$current_dir3"
     elif [ -f "git-update-srv.sh" ]; then
-      git pull origin master
+      git --git-dir="${current_dir3}/.git" --work-tree="${current_dir3}" pull origin master
+      # git pull origin master
       ./git-update-srv.sh
     fi
 
 
 
 
-    if [ $UID -ne 0 ]; then
-    # current_dir3="$PWD"
+    # if [ $UID -ne 0 ]; then
+    # # current_dir3="$PWD"
 
 
-    echo "hostname=$(hostname)"
-    echo ""
-    echo "USER=$(whoami)"
-    echo ""
+    #   echo "hostname=$(hostname)"
+    #   echo ""
+    #   echo "USER=$(whoami)"
+    #   echo ""
 
-    sudo chown -R $USER: "${PWD}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
-    sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
-    sudo chown -R $USER: * 2>/dev/null
-    sudo chown -R $USER: ./* 2>/dev/null
-    sudo chown -R $USER: ./ 2>/dev/null
-    sudo chown -R $USER: . 2>/dev/null
-  fi
+    #   sudo chown -R $USER: "${PWD}" 2>/dev/null
+    #   sudo chown -R $USER: "${GITCID_DIR}.." 2>/dev/null
+    #   sudo chown -R $USER: "${GITCID_DIR}../" 2>/dev/null
+    #   sudo chown -R $USER: "${GITCID_DIR}" 2>/dev/null
+    #   sudo chown -R $USER: "${GITCID_DIR}../.git" 2>/dev/null
+    #   sudo chown -R $USER: * 2>/dev/null
+    #   sudo chown -R $USER: ./* 2>/dev/null
+    #   sudo chown -R $USER: ./ 2>/dev/null
+    #   sudo chown -R $USER: . 2>/dev/null
+    # fi
 
 
   fi
