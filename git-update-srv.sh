@@ -768,7 +768,7 @@ gc_dns_git_server_update_srv_records() {
       continue
     fi
 
-    cd ../bind-${i}/
+    cd bind-${i}/
 
     git pull --no-edit origin master
 
