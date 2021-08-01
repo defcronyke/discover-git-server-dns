@@ -557,7 +557,7 @@ gc_dns_git_server_update_srv_records() {
   mkdir -p "${HOME}/.ssh"
   chmod 700 "${HOME}/.ssh"
 
-  rm -rf workdir
+  # rm -rf workdir
   mkdir -p workdir
   cd workdir
 
@@ -669,17 +669,125 @@ gc_dns_git_server_update_srv_records() {
     # cd "$current_dir"
   done
 
+
+
+  cd "$current_dir"
+  
+  cp -rf bind/db.git bind/db.git.bak
+  # cd bind
+
+
+  rm bind/db.git.ns.next
+  rm bind/db.git.a.next
+  rm bind/db.git.srv.next
+  rm bind/db.git.next
+
+
+  cat bind/db.git.soa | tee bind/db.git.next
+
+
+  for i in ${gc_update_servers_hostnames[@]}; do
+    cd "$current_dir"
+
+    if [ "$i" == "$(hostname)" ]; then
+      continue
+    fi
+
+
+
+    if [ ! -d "bind-${i}" ]; then
+      git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
+      cd "bind-${i}" || continue
+      # gc_dns_git_server_update_srv_records_git "$i"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      
+    else
+      cd "bind-${i}" || continue
+      git reset --hard HEAD
+      git fetch --all
+      git pull --no-edit origin master
+
+      # gc_dns_git_server_update_srv_records_git "$i"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+    fi
+
+    cd "$current_dir"
+  
+    cd bind
+
+
+
+    sort db.git.ns ../bind-${i}/db.git.ns -u | tee -a db.git.ns.next
+    cp -ur db.git.ns.next db.git.ns
+
+    sort db.git.a ../bind-${i}/db.git.a -u | tee -a db.git.a.next
+    cp -ur db.git.a.next db.git.a
+
+    sort db.git.srv ../bind-${i}/db.git.srv -u | tee -a db.git.srv.next
+    cp -ur db.git.srv.next db.git.srv
+
+  done
+
+  cd "$current_dir"
+  cd bind
+
+
+  cat db.git.ns | tee -a db.git.next
+
+  cat db.git.a | tee -a db.git.next
+
+  cat db.git.srv | tee -a db.git.next
+  
+
+
+  cp -ur db.git.next db.git
+
+
+
+
+
+  git add .
+  git commit -m "Full zone file update."
+  # git pull --no-edit origin master
+  git push -u origin master
+  
+
+
+
+  for i in ${gc_update_servers_hostnames[@]}; do
+    cd "$current_dir"
+
+    if [ "$i" == "$(hostname)" ]; then
+      continue
+    fi
+
+    cd bind
+
+    cp -ur db.git.ns ../bind-${$i}/db.git.ns
+    cp -ur db.git.a ../bind-${$i}/db.git.a
+    cp -ur db.git.srv ../bind-${$i}/db.git.srv
+    cp -ur db.git ../bind-${$i}/db.git
+
+    cd ../bind-${$i}/
+
+    git add .
+    git commit -m "Full zone file update."
+    # git pull --no-edit origin master
+    git push -u origin master
+
+  done
+
   cd "$current_dir"
 
-
-  if [ ! -d "bind" ]; then
-    git clone ~/git/etc/bind.git
-    cd bind
-  else
-    cd bind
-    git pull --no-edit origin master
-    # cd "$current_workdir"
-  fi
+  # if [ ! -d "bind" ]; then
+  #   git clone ~/git/etc/bind.git
+  #   cd bind
+  # else
+  #   cd bind
+  #   git pull --no-edit origin master
+  #   # cd "$current_workdir"
+  # fi
 
 
 
