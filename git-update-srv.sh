@@ -82,17 +82,21 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
   echo " | DEBUG | ... END MAKING NEW ZONE FILE ..."
   echo " | DEBUG |"
+
+
+  mkdir -p ${HOME}/.ssh
+  chmod 700 ${HOME}/.ssh
   
 
 
-  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .; \
-  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update zone file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.soa; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update SOA file."; \
   git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
   if [ $? -ne 0 ]; then
     git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
-    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .; \
-    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update zone file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.soa; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update SOA file, second try."; \
     git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
     if [ $? -ne 0 ]; then
@@ -108,8 +112,106 @@ gc_dns_git_server_update_srv_records_git() {
     fi
   fi
 
-  mkdir -p ${HOME}/.ssh
-  chmod 700 ${HOME}/.ssh
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.ns; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update NS file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+  if [ $? -ne 0 ]; then
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.ns; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update NS file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+    if [ $? -ne 0 ]; then
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+      if [ $? -ne 0 ]; then
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+      fi
+    fi
+  fi
+
+
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.a; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update A file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+  if [ $? -ne 0 ]; then
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.a; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update A file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+    if [ $? -ne 0 ]; then
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+      if [ $? -ne 0 ]; then
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+      fi
+    fi
+  fi
+
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.srv; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update SRV file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+  if [ $? -ne 0 ]; then
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git.srv; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update SRV file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+    if [ $? -ne 0 ]; then
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+      if [ $? -ne 0 ]; then
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+      fi
+    fi
+  fi
+
+
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update ZONE file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+  if [ $? -ne 0 ]; then
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add db.git; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update ZONE file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+    if [ $? -ne 0 ]; then
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+
+      if [ $? -ne 0 ]; then
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
+      fi
+    fi
+  fi
+
+
+  
   
   current_dir2="$PWD"
 
