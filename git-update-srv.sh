@@ -682,6 +682,12 @@ gc_dns_git_server_update_srv_records() {
   rm bind/db.git.srv.next
   rm bind/db.git.next
 
+  cd bind
+
+  git pull --no-edit origin master
+
+  cd ..
+
 
   cat bind/db.git.soa | tee bind/db.git.next
 
@@ -762,14 +768,18 @@ gc_dns_git_server_update_srv_records() {
       continue
     fi
 
-    cd bind
+    cd ../bind-${i}/
 
-    cp -ur db.git.ns ../bind-${$i}/db.git.ns
-    cp -ur db.git.a ../bind-${$i}/db.git.a
-    cp -ur db.git.srv ../bind-${$i}/db.git.srv
-    cp -ur db.git ../bind-${$i}/db.git
+    git pull --no-edit origin master
 
-    cd ../bind-${$i}/
+    cd ../bind
+
+    cp -ur db.git.ns ../bind-${i}/db.git.ns
+    cp -ur db.git.a ../bind-${i}/db.git.a
+    cp -ur db.git.srv ../bind-${i}/db.git.srv
+    cp -ur db.git ../bind-${i}/db.git
+
+    cd ../bind-${i}/
 
     git add .
     git commit -m "Full zone file update."
