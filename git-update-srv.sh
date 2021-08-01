@@ -648,7 +648,8 @@ gc_dns_git_server_update_srv_records() {
   fi
 
 
-  sudo systemctl reload bind9
+  sudo systemctl restart bind9 || \
+  sudo systemctl restart named
 
   # cat db.git.soa | tee db.git.next
 
