@@ -381,6 +381,8 @@ gc_dns_git_server_update_srv_records() {
   done
 
   # echo "${gc_update_servers_hostnames[@]}"
+  mkdir -p "${HOME}/.ssh"
+  chmod 700 "${HOME}/.ssh"
 
   rm -rf workdir
   mkdir -p workdir
@@ -395,8 +397,6 @@ gc_dns_git_server_update_srv_records() {
       continue
     fi
     
-    mkdir -p "${HOME}/.ssh"
-    chmod 700 "${HOME}/.ssh"
     # ssh-keygen -F "$i" || ssh-keyscan "$i" >> "${HOME}/.ssh/known_hosts"
 
     gc_ssh_host="$(echo "$i" | cut -d@ -f2)"
@@ -427,7 +427,7 @@ gc_dns_git_server_update_srv_records() {
 
       .gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
 
-      cd workdir
+      cd "$current_dir"
 
       # gitcid_install_new_git_server_rpi_auto_provision "$gc_ssh_host"
 
