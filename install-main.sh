@@ -9,6 +9,9 @@ discover_git_server_dns_install_main() {
 
   sudo apt-get update && \
   sudo apt-get install -y bind9
+
+  sudo gpasswd -a $USER bind
+
   # sudo apt-get install -y bind9 nmap
 
   # Install zone file: /etc/bind/db.git
