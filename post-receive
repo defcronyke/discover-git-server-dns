@@ -76,13 +76,13 @@ gc_dns_post_receive_update_bind_config() {
 
     if [ -f "${HOME}/git-server/discover-git-server-dns/git-update-srv.sh" ]; then
       cd "${HOME}/git-server/discover-git-server-dns"
-      git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" pull origin master
-      ./git-update-srv.sh
+      # git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" pull origin master
+      ${HOME}/git-server/discover-git-server-dns/git-update-srv.sh
       cd "$current_dir3"
     elif [ -f "git-update-srv.sh" ]; then
-      git --git-dir="${current_dir3}/.git" --work-tree="${current_dir3}" pull origin master
+      # git --git-dir="${current_dir3}/.git" --work-tree="${current_dir3}" pull origin master
       # git pull origin master
-      ./git-update-srv.sh
+      ${current_dir3}/git-update-srv.sh
     fi
 
 
