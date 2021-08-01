@@ -5,7 +5,7 @@
 
 gc_dns_git_server_update_srv_records_git() {
 
-  # git pull --no-edit origin master
+  git pull --no-edit origin master
 
   # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
 
@@ -100,7 +100,7 @@ gc_dns_git_server_update_srv_records_git() {
   else
     cd bind
     git pull --no-edit origin master
-    cd "$current_workdir"
+    cd ..
   fi
   
 
@@ -133,253 +133,291 @@ gc_dns_git_server_update_srv_records_git() {
   cp -rf db.git.next ../bind/db.git
 
 
-  git add db.git.soa; \
-  git commit -m "Update SOA file."; \
-  git push -u origin master
-
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.soa; \
-    git commit -m "Update SOA file, second try."; \
-    git push -u origin master
-
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
-
-
-  git add db.git.ns; \
-  git commit -m "Update NS file."; \
-  git push -u origin master
-
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.ns; \
-    git commit -m "Update NS file, second try."; \
-    git push -u origin master
-
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
-
-
-
-  git add db.git.a; \
-  git commit -m "Update A file."; \
-  git push -u origin master
-
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.a; \
-    git commit -m "Update A file, second try."; \
-    git push -u origin master
-
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
-
-
-  git add db.git.srv; \
-  git commit -m "Update SRV file."; \
-  git push -u origin master
-
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.srv; \
-    git commit -m "Update SRV file, second try."; \
-    git push -u origin master
-
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
-
-
-
-  git add db.git; \
-  git commit -m "Update ZONE file."; \
-  git push -u origin master
-
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git; \
-    git commit -m "Update ZONE file, second try."; \
-    git push -u origin master
-
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
-
-
 
 
   cd ../bind
 
 
   git add db.git.soa; \
-  git commit -m "Update SOA file."; \
-  git push -u origin master
+  git commit -m "Update SOA file."
 
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.soa; \
-    git commit -m "Update SOA file, second try."; \
-    git push -u origin master
+  # git push -u origin master
 
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.soa; \
+  #   git commit -m "Update SOA file, second try."; \
+  #   git push -u origin master
 
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
 
 
   git add db.git.ns; \
-  git commit -m "Update NS file."; \
-  git push -u origin master
+  git commit -m "Update NS file."
+  
+  # git push -u origin master
 
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.ns; \
-    git commit -m "Update NS file, second try."; \
-    git push -u origin master
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.ns; \
+  #   git commit -m "Update NS file, second try."; \
+  #   git push -u origin master
 
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
 
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
 
 
 
   git add db.git.a; \
-  git commit -m "Update A file."; \
-  git push -u origin master
+  git commit -m "Update A file."
 
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.a; \
-    git commit -m "Update A file, second try."; \
-    git push -u origin master
+  # git push -u origin master
 
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.a; \
+  #   git commit -m "Update A file, second try."; \
+  #   git push -u origin master
 
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
 
 
   git add db.git.srv; \
-  git commit -m "Update SRV file."; \
-  git push -u origin master
+  git commit -m "Update SRV file."
 
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git.srv; \
-    git commit -m "Update SRV file, second try."; \
-    git push -u origin master
+  # git push -u origin master
 
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.srv; \
+  #   git commit -m "Update SRV file, second try."; \
+  #   git push -u origin master
 
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
 
 
 
   git add db.git; \
-  git commit -m "Update ZONE file."; \
+  git commit -m "Update ZONE file."
+
+
+
+  git pull --no-edit origin master
+
+
   git push -u origin master
 
-  if [ $? -ne 0 ]; then
-    git pull --no-edit origin master
-    git add db.git; \
-    git commit -m "Update ZONE file, second try."; \
-    git push -u origin master
 
-    if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+  # git push -u origin master
 
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
-    fi
-  fi
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git; \
+  #   git commit -m "Update ZONE file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+
+  cd ../"bind-${1}"
+
+
+
+  git add db.git.soa; \
+  git commit -m "Update SOA file."
+
+  # git push -u origin master
+
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.soa; \
+  #   git commit -m "Update SOA file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+  git add db.git.ns; \
+  git commit -m "Update NS file."
+
+  # git push -u origin master
+
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.ns; \
+  #   git commit -m "Update NS file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+
+  git add db.git.a; \
+  git commit -m "Update A file."
+
+  # git push -u origin master
+
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.a; \
+  #   git commit -m "Update A file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+  git add db.git.srv; \
+  git commit -m "Update SRV file."
+
+  # git push -u origin master
+
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git.srv; \
+  #   git commit -m "Update SRV file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+
+  git add db.git; \
+  git commit -m "Update ZONE file."
+
+
+
+
+  git pull --no-edit origin master
+
+  git push -u origin master
+
+
+
+
+  # git push -u origin master
+
+  # if [ $? -ne 0 ]; then
+  #   git pull --no-edit origin master
+  #   git add db.git; \
+  #   git commit -m "Update ZONE file, second try."; \
+  #   git push -u origin master
+
+  #   if [ $? -ne 0 ]; then
+  #     git reset --hard HEAD
+  #     git revert --no-edit HEAD~1
+  #     git push -u origin master
+
+  #     if [ $? -ne 0 ]; then
+  #       git reset --hard HEAD
+  #       git revert --no-edit HEAD~1
+  #       git push -u origin master
+  #     fi
+  #   fi
+  # fi
+
+
+
+
+  
 
 
 
