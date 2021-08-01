@@ -5,20 +5,27 @@
 
 gc_dns_git_server_update_srv_records_git() {
 
-  git pull origin master
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
 
+  cp -rf db.git db.git.bak
+
+  rm db.git.soa 2>/dev/null
+  rm db.git.ns 2>/dev/null
+  rm db.git.a 2>/dev/null
   rm db.git.srv 2>/dev/null
   
-  echo " | DEBUG |"
-  echo " | DEBUG | ... ADD SRV RECORDS ..."
-  echo " | DEBUG |"
-
-  cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
-  tee -a db.git.srv
 
   echo " | DEBUG |"
-  echo " | DEBUG | ... END ADD SRV RECORDS ..."
+  echo " | DEBUG | ... ADD SOA RECORD ..."
   echo " | DEBUG |"
+
+  cat db.git | head -n 11 | \
+  tee -a db.git.soa
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD SOA RECORD ..."
+  echo " | DEBUG |"
+  
 
   echo " | DEBUG |"
   echo " | DEBUG | ... ADD NS RECORDS ..."
@@ -31,33 +38,72 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... END ADD NS RECORDS ..."
   echo " | DEBUG |"
 
-  echo " | DEBUG |"
-  echo " | DEBUG | ... ADD SOA RECORD ..."
-  echo " | DEBUG |"
-
-  cat db.git | head -n 11 | \
-  tee -a db.git.soa
 
   echo " | DEBUG |"
-  echo " | DEBUG | ... END ADD SOA RECORD ..."
+  echo " | DEBUG | ... ADD A RECORDS ..."
+  echo " | DEBUG |"
+
+  cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
+  tee -a db.git.a
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD A RECORDS ..."
+  echo " | DEBUG |"  
+
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... ADD SRV RECORDS ..."
+  echo " | DEBUG |"
+
+  cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
+  tee -a db.git.srv
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
 
-  git add .; git commit -m "Add zone file fragments."; git push -u origin master
+  echo " | DEBUG |"
+  echo " | DEBUG | ... MAKING NEW ZONE FILE ..."
+  echo " | DEBUG |"
+
+  cat db.git.soa | \
+  tee db.git
+
+  cat db.git.ns | \
+  tee -a db.git
+
+  cat db.git.a | \
+  tee -a db.git
+
+  cat db.git.srv | \
+  tee -a db.git
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END MAKING NEW ZONE FILE ..."
+  echo " | DEBUG |"
+  
+
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update zone file."; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
   if [ $? -ne 0 ]; then
-    git pull origin master
-    git add .; git commit -m "Add zone file fragments: Second try."; git push -u origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull origin master
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update zone file, second try."; \
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
     if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
       if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+        git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
       fi
     fi
   fi
@@ -67,81 +113,83 @@ gc_dns_git_server_update_srv_records_git() {
   
   current_dir2="$PWD"
 
-  for k in $@; do
+  # for k in $@; do
     # cd "$current_dir2"
 
-    if [ -z "$k" ]; then
-      echo ".. SKIPPING BECAUSE BLANK: $k"
-      continue
-    fi
+  # if [ -z "$k" ]; then
+  #   echo ".. SKIPPING BECAUSE BLANK: $k"
+  #   continue
+  # fi
 
 
-    # TODO: !! MAYBE WE SHOULD SKIP OURSELVES LIKE BELOW, TO AVOID INFINITE LOOP?
+  # TODO: !! MAYBE WE SHOULD SKIP OURSELVES LIKE BELOW, TO AVOID INFINITE LOOP?
 
-    # if [ "$k" == "$(hostname)" ]; then
-    #   echo "!!!!!  | ! SKIPPING BECAUSE SELF ! |  !!!!!!!"
-    #   continue
-    # fi
+  # if [ "$k" == "$(hostname)" ]; then
+  #   echo "!!!!!  | ! SKIPPING BECAUSE SELF ! |  !!!!!!!"
+  #   continue
+  # fi
 
-    # ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
+  # ssh-keygen -F "$k" || ssh-keyscan "$k" >>${HOME}/.ssh/known_hosts
 
-    # cd ..
+  # cd ..
 
-    # if [ ! -d "bind-${k}" ]; then
-    #   git clone ${k}:~/git/etc/bind.git bind-${k} && \
-    #   cd "bind-${k}"
-    #   if [ $? -ne 0 ]; then
-    #     echo ""
-    #     echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
-    #     echo ""
-    #     continue
-    #   fi
-    # else
-    #   cd "bind-${k}" || continue
-    #   git reset --hard HEAD
-    #   git pull origin master
-    #   if [ $? -ne 0 ]; then
-    #     echo ""
-    #     echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
-    #     echo ""
-    #   fi
-    # fi
+  # if [ ! -d "bind-${k}" ]; then
+  #   git clone ${k}:~/git/etc/bind.git bind-${k} && \
+  #   cd "bind-${k}"
+  #   if [ $? -ne 0 ]; then
+  #     echo ""
+  #     echo "ERROR: Failed cloning repo: ${k}:~/git/etc/bind.git"
+  #     echo ""
+  #     continue
+  #   fi
+  # else
+  #   cd "bind-${k}" || continue
+  #   git reset --hard HEAD
+  #   git pull origin master
+  #   if [ $? -ne 0 ]; then
+  #     echo ""
+  #     echo "ERROR: Failed pulling repo: ${k}:~/git/etc/bind.git"
+  #     echo ""
+  #   fi
+  # fi
 
-    # git remote add upstream ~/git/etc/bind.git || \
-    # git remote set-url upstream ~/git/etc/bind.git
+  # git remote add upstream ~/git/etc/bind.git || \
+  # git remote set-url upstream ~/git/etc/bind.git
 
-    # git remote add git ~/git/etc/bind.git || \
-    # git remote set-url git ~/git/etc/bind.git
+  # git remote add git ~/git/etc/bind.git || \
+  # git remote set-url git ~/git/etc/bind.git
 
-    git remote add upstream ~/git/etc/bind.git || \
-    git remote set-url upstream ~/git/etc/bind.git
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" remote add upstream ~/git/etc/bind.git || \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" remote set-url upstream ~/git/etc/bind.git
 
-    git remote add $k ${k}:~/git/etc/bind.git || \
-    git remote set-url $k ${k}:~/git/etc/bind.git
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" fetch --all
 
-    git fetch --all
+  # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull $k master; \
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
-    git pull $k master; git push -u origin master
+  if [ $? -ne 0 ]; then
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+    git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
     if [ $? -ne 0 ]; then
-      git reset --hard HEAD
-      git revert --no-edit HEAD~1
-      git push -u origin master
-
-      if [ $? -ne 0 ]; then
-        git reset --hard HEAD
-        git revert --no-edit HEAD~1
-        git push -u origin master
-      fi
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" revert --no-edit HEAD~1
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
     fi
+  fi
 
-    git add .
-    git commit -m "Update peer records."
-    git push -u origin master
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update peer records."
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
-  done
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push upstream master
 
-  git add .; git commit -m "Update records END."; git push -u origin master
+  # done
+
+  # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" add .; \
+  # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update records END."; \
+  # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
   return 0
 }
@@ -293,7 +341,7 @@ gc_dns_git_server_update_srv_records() {
       git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
       cd "bind-${i}" || continue
       gc_dns_git_server_update_srv_records_git "$i"
-      gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
     else
       cd "bind-${i}" || continue
@@ -302,7 +350,7 @@ gc_dns_git_server_update_srv_records() {
       git pull origin master
 
       gc_dns_git_server_update_srv_records_git "$i"
-      gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
 
