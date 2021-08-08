@@ -80,7 +80,7 @@ gc_dns_post_receive_update_bind_config() {
 
   cd /etc/bind
 
-  git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull origin master
+  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull origin master
 
 
 
