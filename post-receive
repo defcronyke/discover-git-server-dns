@@ -64,7 +64,7 @@ gc_dns_post_receive_update_bind_config() {
   sudo mv /etc/bind.old /etc/bind.old2 2>/dev/null
 
   sudo rm -rf /etc/bind.old 2>/dev/null
-  sudo mv /etc/bind /etc/bind.old
+  sudo cp -r /etc/bind /etc/bind.old
 
   sudo cp -rf "${HOME}/git-server/discover-git-server-dns/workdir/bind/"* /etc/bind
 
