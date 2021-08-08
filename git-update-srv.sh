@@ -45,14 +45,14 @@ gc_dns_git_server_update_srv_records_git() {
   tee ${current_bind_dir}/db.git.ns.next
 
   cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.ns.next
+  tee -a ${current_bind_dir}/db.git.ns.next
 
-  if [ -f db.git.ns.old ]; then
-    cat db.git.ns.old | sort | uniq | \
-    tee -a db.git.ns.next
+  if [ -f ${current_bind_dir}/db.git.ns.old ]; then
+    cat ${current_bind_dir}/db.git.ns.old | sort | uniq | \
+    tee -a ${current_bind_dir}/db.git.ns.next
   fi
 
-  cp -rf db.git.ns.next db.git.ns.old
+  cp -rf ${current_bind_dir}/db.git.ns.next ${current_bind_dir}/db.git.ns.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD NS RECORDS ..."
@@ -67,14 +67,14 @@ gc_dns_git_server_update_srv_records_git() {
   tee ${current_bind_dir}/db.git.a.next
 
   cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.a.next
+  tee -a ${current_bind_dir}/db.git.a.next
 
-  if [ -f db.git.a.old ]; then
-    cat db.git.a.old | sort | uniq | \
-    tee -a db.git.a.next
+  if [ -f ${current_bind_dir}/db.git.a.old ]; then
+    cat ${current_bind_dir}/db.git.a.old | sort | uniq | \
+    tee -a ${current_bind_dir}/db.git.a.next
   fi
   
-  cp -rf db.git.a.next db.git.a.old
+  cp -rf ${current_bind_dir}/db.git.a.next ${current_bind_dir}/db.git.a.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD A RECORDS ..."
@@ -89,35 +89,35 @@ gc_dns_git_server_update_srv_records_git() {
   tee ${current_bind_dir}/db.git.srv.next
 
   cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.srv.next
+  tee -a ${current_bind_dir}/db.git.srv.next
 
-  if [ -f db.git.ns.old ]; then
-    cat db.git.srv.old | sort | uniq | \
-    tee -a db.git.srv.next
+  if [ -f ${current_bind_dir}/db.git.ns.old ]; then
+    cat ${current_bind_dir}/db.git.srv.old | sort | uniq | \
+    tee -a ${current_bind_dir}/db.git.srv.next
   fi
   
-  cp -rf db.git.srv.next db.git.srv.old
+  cp -rf ${current_bind_dir}/db.git.srv.next ${current_bind_dir}/db.git.srv.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
 
-  cat db.git.soa.next | tee db.git.next
+  # # cat db.git.soa.next | tee db.git.next
 
-  sort db.git.ns.next ${current_bind_dir}/db.git.ns.next -u | tee -a db.git.next
-  # cp -ur db.git.ns.next db.git.ns
+  # sort db.git.ns.next ${current_bind_dir}/db.git.ns.next -u | tee -a db.git.next
+  # # cp -ur db.git.ns.next db.git.ns
 
-  sort db.git.a.next ${current_bind_dir}/db.git.a.next -u | tee -a db.git.next
-  # cp -ur db.git.a.next db.git.a
+  # sort db.git.a.next ${current_bind_dir}/db.git.a.next -u | tee -a db.git.next
+  # # cp -ur db.git.a.next db.git.a
 
-  sort db.git.srv.next ${current_bind_dir}/db.git.srv.next -u | tee -a db.git.next
-  # cp -ur db.git.srv.next db.git.srv
+  # sort db.git.srv.next ${current_bind_dir}/db.git.srv.next -u | tee -a db.git.next
+  # # cp -ur db.git.srv.next db.git.srv
 
 
-  cp -rf db.git db.git.bak
+  # cp -rf db.git db.git.bak
 
-  cp -rf db.git.next db.git
+  # cp -rf db.git.next db.git
 
 
 
@@ -725,13 +725,49 @@ gc_dns_git_server_update_srv_records() {
       # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
 
+
     # cd "$current_dir"
   done
 
 
+  rm "${current_dir}/bind/db.git.ns.next" 2>/dev/null
+  rm "${current_dir}/bind/db.git.a.next" 2>/dev/null
+  rm "${current_dir}/bind/db.git.srv.next" 2>/dev/null
+
+  for i in ${gc_update_servers_hostnames[@]}; do
+    cd "${current_dir}/bind"
+
+    if [ "$i" == "$(hostname)" ]; then
+      continue
+    fi
+
+    cat "${i}/db.git.ns.next" | sort | uniq | \
+    tee -a db.git.ns.next
+
+    cat "${i}/db.git.a.next" | sort | uniq | \
+    tee -a db.git.a.next
+
+    cat "${i}/db.git.srv.next" | sort | uniq | \
+    tee -a db.git.srv.next
+  done
 
   cd "${current_dir}/bind"
 
+  cat db.git.soa.next | \
+  tee db.git.next
+
+  cat db.git.ns.next | sort | uniq | \
+  tee -a db.git.next
+
+  cat db.git.a.next | sort | uniq | \
+  tee -a db.git.next
+
+  cat db.git.srv.next | sort | uniq | \
+  tee -a db.git.next
+
+  cp -rf db.git db.git.bak
+
+  cp -rf db.git.next db.git
 
   git add .
 
