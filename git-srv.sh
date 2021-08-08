@@ -227,7 +227,7 @@ gc_dns_git_server_list_servers_guess_ns() {
 
 
 gc_dns_git_server_list_servers_init() {
-  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-10}
+  GC_MAX_NUM_SERVERS_TO_TRY=${GC_MAX_NUM_SERVERS_TO_TRY:-3}
 
   gc_dns_git_server_list_servers_self_ns $@ & tasks+=( "$!" )
 
@@ -256,7 +256,7 @@ gc_dns_git_server_list_servers_init() {
 
 
 gc_dns_git_server_list_servers_init_srv() {
-  GC_MAX_NUM_SERVERS_TO_TRY_SRV=${GC_MAX_NUM_SERVERS_TO_TRY_SRV:-10}
+  GC_MAX_NUM_SERVERS_TO_TRY_SRV=${GC_MAX_NUM_SERVERS_TO_TRY_SRV:-3}
 
   # gc_dns_git_server_list_servers_self_ns $@ & tasks+=( "$!" )
 
