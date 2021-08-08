@@ -66,7 +66,10 @@ gc_dns_post_receive_update_bind_config() {
   sudo rm -rf /etc/bind.old 2>/dev/null
   sudo cp -r /etc/bind /etc/bind.old
 
-  sudo cp -rf "${HOME}/git-server/discover-git-server-dns/workdir/bind/"* /etc/bind
+  cd "${HOME}/git-server/discover-git-server-dns/workdir/bind/"
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind" pull origin master
+
+  sudo cp -r "${HOME}/git-server/discover-git-server-dns/workdir/bind/"* /etc/bind
 
   # sudo git --work-tree="/etc/bind" clone "${HOME}/git/etc/bind.git" /etc/bind
 
