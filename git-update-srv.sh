@@ -5,16 +5,24 @@
 
 gc_dns_git_server_update_srv_records_git() {
 
+  git reset --hard HEAD
+
   git pull --no-edit origin master
 
   # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
 
-  cp -rf db.git db.git.bak
 
-  rm db.git.soa 2>/dev/null
-  rm db.git.ns 2>/dev/null
-  rm db.git.a 2>/dev/null
-  rm db.git.srv 2>/dev/null
+  current_bind_dir="$PWD"
+
+  cd ../bind
+
+
+  # cp -rf db.git db.git.bak
+
+  # rm db.git.soa 2>/dev/null
+  # rm db.git.ns 2>/dev/null
+  # rm db.git.a 2>/dev/null
+  # rm db.git.srv 2>/dev/null
   
 
   echo " | DEBUG |"
@@ -22,7 +30,7 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
 
   cat db.git | head -n 11 | \
-  tee -a db.git.soa
+  tee db.git.soa.next
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD SOA RECORD ..."
@@ -33,8 +41,11 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... ADD NS RECORDS ..."
   echo " | DEBUG |"
 
+  cat ${current_bind_dir}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.ns
+
   cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
-  tee -a db.git.ns
+  tee db.git.ns.next
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD NS RECORDS ..."
@@ -45,8 +56,11 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... ADD A RECORDS ..."
   echo " | DEBUG |"
 
+  cat ${current_bind_dir}/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.a
+
   cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
-  tee -a db.git.a
+  tee db.git.a.next
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD A RECORDS ..."
@@ -57,89 +71,113 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
+  cat ${current_bind_dir}/db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.srv
+
   cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
-  tee -a db.git.srv
+  tee db.git.srv.next
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
 
-  echo " | DEBUG |"
-  echo " | DEBUG | ... MAKING NEW ZONE FILE ..."
-  echo " | DEBUG |"
+  cat db.git.soa.next | tee db.git.next
 
-  cat db.git.soa | \
-  tee db.git
+  sort db.git.ns.next ${current_bind_dir}/db.git.ns.next -u | tee -a db.git.next
+  # cp -ur db.git.ns.next db.git.ns
 
-  cat db.git.ns | \
-  tee -a db.git
+  sort db.git.a.next ${current_bind_dir}/db.git.a.next -u | tee -a db.git.next
+  # cp -ur db.git.a.next db.git.a
 
-  cat db.git.a | \
-  tee -a db.git
+  sort db.git.srv.next ${current_bind_dir}/db.git.srv.next -u | tee -a db.git.next
+  # cp -ur db.git.srv.next db.git.srv
 
-  cat db.git.srv | \
-  tee -a db.git
-
-  echo " | DEBUG |"
-  echo " | DEBUG | ... END MAKING NEW ZONE FILE ..."
-  echo " | DEBUG |"
-
-
-  mkdir -p ${HOME}/.ssh
-  chmod 700 ${HOME}/.ssh
-
-
-
-  cd ..
-
-  current_workdir="$PWD"
-
-  if [ ! -d "bind" ]; then
-    git clone ~/git/etc/bind.git
-  else
-    cd bind
-    git pull --no-edit origin master
-    cd ..
-  fi
-  
-
-  cd "bind-${1}"
-
-  sort ../bind/db.git.ns db.git.ns -u | tee db.git.ns.next
-  cp -ur db.git.ns.next db.git.ns
-  cp -ur db.git.ns.next ../bind/db.git.ns
-
-  sort ../bind/db.git.a db.git.a -u | tee db.git.a.next
-  cp -ur db.git.a.next db.git.a
-  cp -ur db.git.a.next ../bind/db.git.a
-
-  sort ../bind/db.git.srv db.git.srv -u | tee db.git.srv.next
-  cp -ur db.git.srv.next db.git.srv
-  cp -ur db.git.srv.next ../bind/db.git.srv
 
   cp -rf db.git db.git.bak
-  cp -rf ../bind/db.git ../bind/db.git.bak
-
-
-
-  cat db.git.soa | tee db.git.next
-
-  cat db.git.ns | tee -a db.git.next
-  cat db.git.a | tee -a db.git.next
-  cat db.git.srv | tee -a db.git.next
 
   cp -rf db.git.next db.git
-  cp -rf db.git.next ../bind/db.git
+
+
+
+  cd "${current_bind_dir}"
+
+
+  # echo " | DEBUG |"
+  # echo " | DEBUG | ... MAKING NEW ZONE FILE ..."
+  # echo " | DEBUG |"
+
+  # # cat db.git.soa | \
+  # # tee db.git.next
+
+  # # cat db.git.ns | \
+  # # tee -a db.git.next
+
+  # # cat db.git.a | \
+  # # tee -a db.git.next
+
+  # # cat db.git.srv | \
+  # # tee -a db.git.next
+
+  # echo " | DEBUG |"
+  # echo " | DEBUG | ... END MAKING NEW ZONE FILE ..."
+  # echo " | DEBUG |"
+
+
+  # mkdir -p ${HOME}/.ssh
+  # chmod 700 ${HOME}/.ssh
+
+
+
+  # cd ..
+
+  # current_workdir="$PWD"
+
+  # if [ ! -d "bind" ]; then
+  #   git clone ~/git/etc/bind.git
+  # else
+  #   cd bind
+  #   git pull --no-edit origin master
+  #   cd ..
+  # fi
+  
+
+  # cd "bind-${1}"
+
+  # sort ../bind/db.git.ns db.git.ns -u | tee db.git.ns.next
+  # cp -ur db.git.ns.next db.git.ns
+  # cp -ur db.git.ns.next ../bind/db.git.ns
+
+  # sort ../bind/db.git.a db.git.a -u | tee db.git.a.next
+  # cp -ur db.git.a.next db.git.a
+  # cp -ur db.git.a.next ../bind/db.git.a
+
+  # sort ../bind/db.git.srv db.git.srv -u | tee db.git.srv.next
+  # cp -ur db.git.srv.next db.git.srv
+  # cp -ur db.git.srv.next ../bind/db.git.srv
+
+  # cp -rf db.git db.git.bak
+  # cp -rf ../bind/db.git ../bind/db.git.bak
+
+
+
+  # cat db.git.soa | tee db.git.next
+
+  # cat db.git.ns | tee -a db.git.next
+  # cat db.git.a | tee -a db.git.next
+  # cat db.git.srv | tee -a db.git.next
+
+  # cp -rf db.git.next db.git
+  # cp -rf db.git.next ../bind/db.git
 
 
 
 
-  cd ../bind
+  # cd ../bind
 
 
-  git add db.git.soa; \
-  git commit -m "Update SOA file."
+  # git add db.git.soa; \
+  # git commit -m "Update SOA file."
 
   # git push -u origin master
 
@@ -163,8 +201,8 @@ gc_dns_git_server_update_srv_records_git() {
   # fi
 
 
-  git add db.git.ns; \
-  git commit -m "Update NS file."
+  # git add db.git.ns; \
+  # git commit -m "Update NS file."
   
   # git push -u origin master
 
@@ -189,8 +227,8 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  git add db.git.a; \
-  git commit -m "Update A file."
+  # git add db.git.a; \
+  # git commit -m "Update A file."
 
   # git push -u origin master
 
@@ -214,8 +252,8 @@ gc_dns_git_server_update_srv_records_git() {
   # fi
 
 
-  git add db.git.srv; \
-  git commit -m "Update SRV file."
+  # git add db.git.srv; \
+  # git commit -m "Update SRV file."
 
   # git push -u origin master
 
@@ -240,15 +278,15 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  git add db.git; \
-  git commit -m "Update ZONE file."
+  # git add db.git; \
+  # git commit -m "Update ZONE file."
 
 
 
-  git pull --no-edit origin master
+  # git pull --no-edit origin master
 
 
-  git push -u origin master
+  # git push -u origin master
 
 
   # git push -u origin master
@@ -274,12 +312,12 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  cd ../"bind-${1}"
+  # cd ../"bind-${1}"
 
 
 
-  git add db.git.soa; \
-  git commit -m "Update SOA file."
+  # git add db.git.soa; \
+  # git commit -m "Update SOA file."
 
   # git push -u origin master
 
@@ -303,8 +341,8 @@ gc_dns_git_server_update_srv_records_git() {
   # fi
 
 
-  git add db.git.ns; \
-  git commit -m "Update NS file."
+  # git add db.git.ns; \
+  # git commit -m "Update NS file."
 
   # git push -u origin master
 
@@ -329,8 +367,8 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  git add db.git.a; \
-  git commit -m "Update A file."
+  # git add db.git.a; \
+  # git commit -m "Update A file."
 
   # git push -u origin master
 
@@ -354,8 +392,8 @@ gc_dns_git_server_update_srv_records_git() {
   # fi
 
 
-  git add db.git.srv; \
-  git commit -m "Update SRV file."
+  # git add db.git.srv; \
+  # git commit -m "Update SRV file."
 
   # git push -u origin master
 
@@ -380,15 +418,15 @@ gc_dns_git_server_update_srv_records_git() {
 
 
 
-  git add db.git; \
-  git commit -m "Update ZONE file."
+  # git add db.git; \
+  # git commit -m "Update ZONE file."
 
 
 
 
-  git pull --no-edit origin master
+  # git pull --no-edit origin master
 
-  git push -u origin master
+  # git push -u origin master
 
 
 
@@ -658,7 +696,7 @@ gc_dns_git_server_update_srv_records() {
     else
       cd "bind-${i}" || continue
       git reset --hard HEAD
-      git fetch --all
+      # git fetch --all
       git pull --no-edit origin master
 
       gc_dns_git_server_update_srv_records_git "$i"
@@ -671,124 +709,134 @@ gc_dns_git_server_update_srv_records() {
 
 
 
-  cd "$current_dir"
-  
-  cp -rf bind/db.git bind/db.git.bak
-  # cd bind
-
-
-  rm bind/db.git.ns.next
-  rm bind/db.git.a.next
-  rm bind/db.git.srv.next
-  rm bind/db.git.next
-
-  cd bind
-
-  git pull --no-edit origin master
-
-  cd ..
-
-
-  cat bind/db.git.soa | tee bind/db.git.next
-
-
-  for i in ${gc_update_servers_hostnames[@]}; do
-    cd "$current_dir"
-
-    if [ "$i" == "$(hostname)" ]; then
-      continue
-    fi
-
-
-
-    if [ ! -d "bind-${i}" ]; then
-      git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
-      cd "bind-${i}" || continue
-      # gc_dns_git_server_update_srv_records_git "$i"
-      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
-      
-    else
-      cd "bind-${i}" || continue
-      git reset --hard HEAD
-      git fetch --all
-      git pull --no-edit origin master
-
-      # gc_dns_git_server_update_srv_records_git "$i"
-      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
-      # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
-    fi
-
-    cd "$current_dir"
-  
-    cd bind
-
-
-
-    sort db.git.ns ../bind-${i}/db.git.ns -u | tee -a db.git.ns.next
-    cp -ur db.git.ns.next db.git.ns
-
-    sort db.git.a ../bind-${i}/db.git.a -u | tee -a db.git.a.next
-    cp -ur db.git.a.next db.git.a
-
-    sort db.git.srv ../bind-${i}/db.git.srv -u | tee -a db.git.srv.next
-    cp -ur db.git.srv.next db.git.srv
-
-  done
-
-  cd "$current_dir"
-  cd bind
-
-
-  cat db.git.ns | tee -a db.git.next
-
-  cat db.git.a | tee -a db.git.next
-
-  cat db.git.srv | tee -a db.git.next
-  
-
-
-  cp -ur db.git.next db.git
-
-
-
+  cd "${current_dir}/bind"
 
 
   git add .
-  git commit -m "Full zone file update."
-  # git pull --no-edit origin master
+
+  git commit -m "Update bind zone files."
+
   git push -u origin master
+
+
+
+  
+  # cp -rf bind/db.git bind/db.git.bak
+  # # cd bind
+
+
+  # rm bind/db.git.ns.next
+  # rm bind/db.git.a.next
+  # rm bind/db.git.srv.next
+  # rm bind/db.git.next
+
+  # cd bind
+
+  # git pull --no-edit origin master
+
+  # cd ..
+
+
+  # cat bind/db.git.soa | tee bind/db.git.next
+
+
+  # for i in ${gc_update_servers_hostnames[@]}; do
+  #   cd "$current_dir"
+
+  #   if [ "$i" == "$(hostname)" ]; then
+  #     continue
+  #   fi
+
+
+
+  #   if [ ! -d "bind-${i}" ]; then
+  #     git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
+  #     cd "bind-${i}" || continue
+  #     # gc_dns_git_server_update_srv_records_git "$i"
+  #     # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      
+  #   else
+  #     cd "bind-${i}" || continue
+  #     git reset --hard HEAD
+  #     git fetch --all
+  #     git pull --no-edit origin master
+
+  #     # gc_dns_git_server_update_srv_records_git "$i"
+  #     # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+  #     # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+  #   fi
+
+  #   cd "$current_dir"
+  
+  #   cd bind
+
+
+
+  #   sort db.git.ns ../bind-${i}/db.git.ns -u | tee -a db.git.ns.next
+  #   cp -ur db.git.ns.next db.git.ns
+
+  #   sort db.git.a ../bind-${i}/db.git.a -u | tee -a db.git.a.next
+  #   cp -ur db.git.a.next db.git.a
+
+  #   sort db.git.srv ../bind-${i}/db.git.srv -u | tee -a db.git.srv.next
+  #   cp -ur db.git.srv.next db.git.srv
+
+  # done
+
+  # cd "$current_dir"
+  # cd bind
+
+
+  # cat db.git.ns | tee -a db.git.next
+
+  # cat db.git.a | tee -a db.git.next
+
+  # cat db.git.srv | tee -a db.git.next
+  
+
+
+  # cp -ur db.git.next db.git
+
+
+
+
+
+  # git add .
+  # git commit -m "Full zone file update."
+  # # git pull --no-edit origin master
+  # git push -u origin master
   
 
 
 
-  for i in ${gc_update_servers_hostnames[@]}; do
-    cd "$current_dir"
+  # for i in ${gc_update_servers_hostnames[@]}; do
+  #   cd "$current_dir"
 
-    if [ "$i" == "$(hostname)" ]; then
-      continue
-    fi
+  #   if [ "$i" == "$(hostname)" ]; then
+  #     continue
+  #   fi
 
-    cd bind-${i}/
+  #   cd bind-${i}/
 
-    git pull --no-edit origin master
+  #   git pull --no-edit origin master
 
-    cd ../bind
+  #   cd ../bind
 
-    cp -ur db.git.ns ../bind-${i}/db.git.ns
-    cp -ur db.git.a ../bind-${i}/db.git.a
-    cp -ur db.git.srv ../bind-${i}/db.git.srv
-    cp -ur db.git ../bind-${i}/db.git
+  #   cp -ur db.git.ns ../bind-${i}/db.git.ns
+  #   cp -ur db.git.a ../bind-${i}/db.git.a
+  #   cp -ur db.git.srv ../bind-${i}/db.git.srv
+  #   cp -ur db.git ../bind-${i}/db.git
 
-    cd ../bind-${i}/
+  #   cd ../bind-${i}/
 
-    git add .
-    git commit -m "Full zone file update."
-    # git pull --no-edit origin master
-    git push -u origin master
+  #   git add .
+  #   git commit -m "Full zone file update."
+  #   # git pull --no-edit origin master
+  #   git push -u origin master
 
-  done
+  # done
 
-  cd "$current_dir"
+  # cd "$current_dir"
 
   # if [ ! -d "bind" ]; then
   #   git clone ~/git/etc/bind.git
