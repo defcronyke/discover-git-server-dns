@@ -1247,6 +1247,6 @@ gc_dns_git_server_update_srv_records() {
 
 gc_dns_git_server_update_srv_records $@
 
-# Run this a second time to cause the DNS records 
-# to propagate to the other git servers.
-gc_dns_git_server_update_srv_records $@ 
+# # Run this a second time to cause the DNS records 
+# # to propagate to the other git servers.
+# gc_dns_git_server_update_srv_records $@ 
