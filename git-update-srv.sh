@@ -42,10 +42,17 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
 
   cat ${current_bind_dir}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.ns
+  tee ${current_bind_dir}/db.git.ns.next
 
   cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
   tee db.git.ns.next
+
+  if [ -f db.git.ns.old ]; then
+    cat db.git.ns.old | sort | uniq | \
+    tee -a db.git.ns.next
+  fi
+
+  cp -rf db.git.ns.next db.git.ns.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD NS RECORDS ..."
@@ -57,10 +64,17 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
 
   cat ${current_bind_dir}/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.a
+  tee ${current_bind_dir}/db.git.a.next
 
   cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
   tee db.git.a.next
+
+  if [ -f db.git.a.old ]; then
+    cat db.git.a.old | sort | uniq | \
+    tee -a db.git.a.next
+  fi
+  
+  cp -rf db.git.a.next db.git.a.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD A RECORDS ..."
@@ -72,10 +86,17 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
 
   cat ${current_bind_dir}/db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.srv
+  tee ${current_bind_dir}/db.git.srv.next
 
   cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
   tee db.git.srv.next
+
+  if [ -f db.git.ns.old ]; then
+    cat db.git.srv.old | sort | uniq | \
+    tee -a db.git.srv.next
+  fi
+  
+  cp -rf db.git.srv.next db.git.srv.old
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD SRV RECORDS ..."
