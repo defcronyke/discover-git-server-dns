@@ -568,7 +568,7 @@ gc_dns_git_server_update_srv_records_git() {
 gc_dns_git_server_update_srv_records() {
   GITCID_DIR=${GITCID_DIR:-"${PWD}/.gc/"}
   
-  gc_update_servers="$("${HOME}/git-server/discover-git-server-dns/git-srv.sh")"
+  gc_update_servers="$("${HOME}/git-server/discover-git-server-dns/git-srv.sh" $@)"
 
   echo ""
   echo "GIT SERVERS:"
@@ -576,11 +576,19 @@ gc_dns_git_server_update_srv_records() {
   echo "$gc_update_servers"
   echo ""
 
-  gc_update_servers_hostnames=( $@ )
+  # gc_update_servers_hostnames_args=( $@ )
+
+  gc_update_servers_hostnames=( )
   
   for i in "${gc_update_servers[@]}"; do
     gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
   done
+
+  # echo ""
+  # echo "GIT SERVER HOSTNAMES ARGS:"
+  # echo ""
+  # echo "$gc_update_servers_hostnames_args"
+  # echo ""
 
   echo ""
   echo "GIT SERVER HOSTNAMES:"
