@@ -62,6 +62,8 @@ gc_dns_post_receive_update_bind_config() {
 
   sudo rm -rf /etc/bind.old2 2>/dev/null
   sudo mv /etc/bind.old /etc/bind.old2 2>/dev/null
+
+  sudo rm -rf /etc/bind.old 2>/dev/null
   sudo mv /etc/bind /etc/bind.old
 
   sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" clone "${HOME}/git/etc/bind.git" /etc/bind
