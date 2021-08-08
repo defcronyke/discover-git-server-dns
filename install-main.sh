@@ -7,9 +7,7 @@ discover_git_server_dns_install_main() {
   echo "Installing and setting up bind DNS server for service discovery purposes if it wasn't installed yet..."
   echo ""
 
-  echo ""
   echo "Updating file: /etc/hosts"
-  echo ""
 
   cat /etc/hosts | grep "127\.0\.0\.1" | grep "$(hostname)" >/dev/null
   if [ $? -ne 0 ]; then
@@ -21,9 +19,8 @@ discover_git_server_dns_install_main() {
     sudo sed -i "s/^127.0.1.1.*$//g" /etc/hosts
   fi
 
-  cat /etc/hosts
-
   echo ""
+  cat /etc/hosts
   echo ""
 
   sudo apt-get update && \
