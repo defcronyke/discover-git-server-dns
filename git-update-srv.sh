@@ -66,6 +66,9 @@ gc_dns_git_server_update_srv_records_git() {
   cat ${current_bind_dir}/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
   tee ${current_bind_dir}/db.git.a.next
 
+  # Remove old self hostname from peer zone file.
+  sed -i "s/^$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" ${current_bind_dir}/db.git.a.next
+
   cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
   tee -a ${current_bind_dir}/db.git.a.next
 
