@@ -870,13 +870,13 @@ gc_dns_git_server_update_srv_records() {
       continue
     fi
 
-    cat "${i}/db.git.ns.next" | sort | uniq | \
+    cat "${current_dir}/bind-${i}/db.git.ns.next" | sort | uniq | \
     tee -a db.git.ns.next
 
-    cat "${i}/db.git.a.next" | sort | uniq | \
+    cat "${current_dir}/bind-${i}/db.git.a.next" | sort | uniq | \
     tee -a db.git.a.next
 
-    cat "${i}/db.git.srv.next" | sort | uniq | \
+    cat "${current_dir}/bind-${i}/db.git.srv.next" | sort | uniq | \
     tee -a db.git.srv.next
   done
 
