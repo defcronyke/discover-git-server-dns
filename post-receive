@@ -83,9 +83,12 @@ gc_dns_post_receive_update_bind_config() {
   sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull origin master
 
 
+  sudo systemctl reload bind9 || \
+  sudo systemctl reload named
 
-  sudo systemctl try-restart bind9 || \
-  sudo systemctl try-restart named
+
+  # sudo systemctl try-restart bind9 || \
+  # sudo systemctl try-restart named
 
   if [ $? -eq 0 ]; then
     echo "info: The bind DNS config has been updated, and the new config is now active."

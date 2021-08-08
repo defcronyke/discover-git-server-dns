@@ -235,11 +235,11 @@ discover_git_server_dns_install_main() {
     echo "NOTICE: Not enabling bind9.service because there was already some DNS service running."
     echo ""
 
-    sudo systemctl restart bind9 2>/dev/null || \
-    sudo systemctl restart named 2>/dev/null || \
-    true
+    # sudo systemctl restart bind9 2>/dev/null || \
+    # sudo systemctl restart named 2>/dev/null || \
+    # true
 
-    sudo systemctl daemon-reload
+    # sudo systemctl daemon-reload
 
     # sudo systemctl try-restart bind9 2>/dev/null || \
     # sudo systemctl try-restart named 2>/dev/null || \
