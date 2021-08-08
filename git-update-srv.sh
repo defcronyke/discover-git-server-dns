@@ -578,7 +578,7 @@ gc_dns_git_server_update_srv_records() {
 
   gc_update_servers_hostnames=( $@ )
   
-  for i in ${gc_update_servers[@]}; do
+  for i in $gc_update_servers; do
     gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
   done
 
