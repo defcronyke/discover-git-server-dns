@@ -626,22 +626,24 @@ gc_dns_git_server_update_srv_records() {
   cd "${current_dir}"
 
 
-  if [ ! -d "bind" ]; then
-      git clone ~/git/etc/bind.git && \
-      # cd "bind"
-      # gc_dns_git_server_update_srv_records_git "$i"
-      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+  if [ ! -d "${current_dir}/bind" ]; then
+    git clone ~/git/etc/bind.git "${current_dir}/bind"
+    # cd "bind"
+    # gc_dns_git_server_update_srv_records_git "$i"
+    # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
-    else
-      cd "bind" || continue
-      git reset --hard HEAD
-      # git fetch --all
-      git pull --no-edit origin master
+  else
+    cd "${current_dir}/bind"
+    git reset --hard HEAD
+    # git fetch --all
+    git pull --no-edit origin master
 
-      # gc_dns_git_server_update_srv_records_git "$i"
-      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
-      # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
-    fi
+    cd "${current_dir}"
+
+    # gc_dns_git_server_update_srv_records_git "$i"
+    # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+    # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+  fi
 
 
 
