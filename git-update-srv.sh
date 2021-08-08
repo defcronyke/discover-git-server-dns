@@ -870,6 +870,21 @@ gc_dns_git_server_update_srv_records() {
       continue
     fi
 
+
+    echo ""
+    echo "Adding zone to file if necessary: /etc/bind/named.conf.local"
+    echo ""
+
+    cat "${current_dir}/bind/named.conf.local" | grep "zone \"${i}\"" >/dev/null
+    if [ $? -ne 0 ]; then
+      printf '%b\n' "zone \"${i}\" {\n\
+  type master;\n\
+  file \"/etc/bind/db.git\";\n\
+};" | \
+      sudo tee -a "${current_dir}/bind/named.conf.local"
+    fi
+
+
     cat "${current_dir}/bind-${i}/db.git.ns.next" | sort | uniq | \
     tee -a db.git.ns.next
 

@@ -210,6 +210,8 @@ discover_git_server_dns_install_main() {
     echo ""
   fi
 
+
+
   dig @"$(hostname)" "$(hostname)" >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "Enabling systemd service: bind9.service"
