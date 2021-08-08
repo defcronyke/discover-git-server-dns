@@ -7,6 +7,25 @@ discover_git_server_dns_install_main() {
   echo "Installing and setting up bind DNS server for service discovery purposes if it wasn't installed yet..."
   echo ""
 
+  echo ""
+  echo "Updating file: /etc/hosts"
+  echo ""
+
+  cat /etc/hosts | grep "127\.0\.0\.1" | grep "$(hostname)" >/dev/null
+  if [ $? -ne 0 ]; then
+    sudo sed -i "s/^\(127\.0\.0\.1\s*\)\(localhost\)\(\s*.*\)$/\1$(hostname) \2\3/g" /etc/hosts
+  fi
+
+  cat /etc/hosts | grep "127\.0\.1\.1" | grep "$(hostname)" >/dev/null
+  if [ $? -eq 0 ]; then
+    sudo sed -i "s/^127.0.1.1.*$//g" /etc/hosts
+  fi
+
+  cat /etc/hosts
+
+  echo ""
+  echo ""
+
   sudo apt-get update && \
   sudo apt-get install -y bind9
 
