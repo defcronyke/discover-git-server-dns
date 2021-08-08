@@ -5,9 +5,9 @@
 
 gc_dns_git_server_update_srv_records_git() {
 
-  git reset --hard HEAD
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
 
-  git pull --no-edit origin master
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
 
   # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
 
@@ -661,23 +661,23 @@ gc_dns_git_server_update_srv_records() {
   mkdir -p workdir
   cd workdir
 
-  current_dir="$PWD"
+  current_dir="${HOME}/git-server/discover-git-server-dns/workdir"
 
 
   cd "${current_dir}"
 
 
   if [ ! -d "${current_dir}/bind" ]; then
-    git clone ~/git/etc/bind.git "${current_dir}/bind"
+    git clone ${HOME}/git/etc/bind.git "${current_dir}/bind"
     cd "${current_dir}/bind"
     # gc_dns_git_server_update_srv_records_git "$i"
     # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
   else
     cd "${current_dir}/bind"
-    git reset --hard HEAD
+    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" reset --hard HEAD
     # git fetch --all
-    git pull --no-edit origin master
+    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" pull --no-edit origin master
 
 
     # gc_dns_git_server_update_srv_records_git "$i"
@@ -714,11 +714,11 @@ gc_dns_git_server_update_srv_records() {
       echo "INFO: Triggering GitCid update, because maybe it's needed..."
       echo ""
 
-      cd ..
+      cd ${current_dir}/..
 
-      rm .gc/.gc-last-update-check.txt
+      rm "${current_dir}/../.gc/.gc-last-update-check.txt"
 
-      git pull --no-edit origin master
+      git --git-dir="${current_dir}/../.git" --work-tree="${current_dir}/.." pull --no-edit origin master
 
       source <(curl -sL https://tinyurl.com/gitcid) -e
 
@@ -726,7 +726,7 @@ gc_dns_git_server_update_srv_records() {
       echo "INFO: No ssh config for user found. Trying Raspberry Pi auto-config..."
       echo ""
 
-      .gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
+      ${current_dir}/../.gc/.gc-util/provision-git-server-rpi.sh "$gc_ssh_host"
 
       cd "$current_dir"
 
@@ -778,16 +778,16 @@ gc_dns_git_server_update_srv_records() {
     # ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
     if [ ! -d "${current_dir}/bind-${i}" ]; then
-      git clone ${i}:~/git/etc/bind.git "${current_dir}/bind-${i}" && \
+      git clone ${i}:${HOME}/git/etc/bind.git "${current_dir}/bind-${i}" && \
       cd "${current_dir}/bind-${i}" || continue
       gc_dns_git_server_update_srv_records_git "$i"
       # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
     else
       cd "${current_dir}/bind-${i}" || continue
-      git reset --hard HEAD
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
       # git fetch --all
-      git pull --no-edit origin master
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
 
       gc_dns_git_server_update_srv_records_git "$i"
       # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
@@ -820,8 +820,8 @@ gc_dns_git_server_update_srv_records() {
   echo " | DEBUG | ... ADD SOA RECORD ..."
   echo " | DEBUG |"
 
-  cat db.git | head -n 11 | \
-  tee db.git.soa.next
+  cat ${current_dir}/bind/db.git | head -n 11 | \
+  tee ${current_dir}/bind/db.git.soa.next
 
   echo " | DEBUG |"
   echo " | DEBUG | ... END ADD SOA RECORD ..."
@@ -832,8 +832,8 @@ gc_dns_git_server_update_srv_records() {
   echo " | DEBUG | ... ADD NS RECORDS ..."
   echo " | DEBUG |"
 
-  cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.ns.next
+  cat ${current_dir}/bind/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
+  tee ${current_dir}/bind/db.git.ns.next
 
   # if [ -f db.git.ns.old ]; then
   #   cat db.git.ns.old | sort | uniq | \
@@ -852,11 +852,11 @@ gc_dns_git_server_update_srv_records() {
   echo " | DEBUG |"
 
   # Remove old self hostname from zone file.
-  sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" db.git
-  sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" db.git
+  sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" ${current_dir}/bind/db.git
+  sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" ${current_dir}/bind/db.git
 
-  cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.a.next
+  cat ${current_dir}/bind/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
+  tee ${current_dir}/bind/db.git.a.next
 
   # if [ -f db.git.a.old ]; then
   #   # Remove old self hostname from zone file.
@@ -868,9 +868,14 @@ gc_dns_git_server_update_srv_records() {
   # fi
 
   # Add current self hostname to zone file.
-  echo "@       IN      A      $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a db.git.a.next
-  echo "$(hostname).       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a db.git.a.next
-  echo "$(hostname)       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a db.git.a.next
+  echo "@       IN      A      $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | \
+  sudo tee -a ${current_dir}/bind/db.git.a.next
+  
+  echo "$(hostname).       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | \
+  sudo tee -a ${current_dir}/bind/db.git.a.next
+  
+  echo "$(hostname)       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | \
+  sudo tee -a ${current_dir}/bind/db.git.a.next
   
   # cp -rf db.git.a.next db.git.a.old
 
@@ -883,8 +888,8 @@ gc_dns_git_server_update_srv_records() {
   echo " | DEBUG | ... ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
-  cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
-  tee db.git.srv.next
+  cat ${current_dir}/bind/db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
+  tee ${current_dir}/bind/db.git.srv.next
 
   # if [ -f db.git.ns.old ]; then
   #   cat db.git.srv.old | sort | uniq | \
@@ -922,38 +927,38 @@ gc_dns_git_server_update_srv_records() {
 
 
     cat "${current_dir}/bind-${i}/db.git.ns.next" | \
-    tee -a db.git.ns.next
+    tee -a ${current_dir}/bind/db.git.ns.next
 
     cat "${current_dir}/bind-${i}/db.git.a.next" | sort | uniq | \
-    tee -a db.git.a.next
+    tee -a ${current_dir}/bind/db.git.a.next
 
     cat "${current_dir}/bind-${i}/db.git.srv.next" | sort | uniq | \
-    tee -a db.git.srv.next
+    tee -a ${current_dir}/bind/db.git.srv.next
   done
 
   cd "${current_dir}/bind"
 
-  cat db.git.soa.next | \
-  tee db.git.next
+  cat ${current_dir}/bind/db.git.soa.next | \
+  tee ${current_dir}/bind/db.git.next
 
-  cat db.git.ns.next | \
-  tee -a db.git.next
+  cat ${current_dir}/bind/db.git.ns.next | \
+  tee -a ${current_dir}/bind/db.git.next
 
-  cat db.git.a.next | sort | uniq | \
-  tee -a db.git.next
+  cat ${current_dir}/bind/db.git.a.next | sort | uniq | \
+  tee -a ${current_dir}/bind/db.git.next
 
-  cat db.git.srv.next | sort | uniq | \
-  tee -a db.git.next
+  cat ${current_dir}/bind/db.git.srv.next | sort | uniq | \
+  tee -a ${current_dir}/bind/db.git.next
 
-  cp -rf db.git db.git.bak
+  cp -rf ${current_dir}/bind/db.git ${current_dir}/bind/db.git.bak
 
-  cp -rf db.git.next db.git
+  cp -rf ${current_dir}/bind/db.git.next ${current_dir}/bind/db.git
 
-  git add .
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" add .
 
-  git commit -m "Update bind zone files."
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" commit -m "Update bind zone files."
 
-  git push -u origin master
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" push -u origin master
 
 
 
@@ -1242,7 +1247,7 @@ gc_dns_git_server_update_srv_records() {
 
   # cat db.git.soa | tee db.git.next
 
-  cd ../..
+  cd ${current_dir}/..
 
   return 0
 }
