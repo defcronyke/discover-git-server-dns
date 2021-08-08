@@ -63,10 +63,12 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... ADD A RECORDS ..."
   echo " | DEBUG |"
 
-  # Remove old self hostname from zone file.
-  sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" db.git
+  # sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" db.git
   # sed -i "s/^\${1}\.?\s*IN\s*A\s*.*\.?$//g" ${current_bind_dir}/db.git
   # sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" db.git
+
+  # Remove old self hostname from zone file.
+  sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" ${current_bind_dir}/db.git
   
   cat ${current_bind_dir}/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
   tee ${current_bind_dir}/db.git.a.next
