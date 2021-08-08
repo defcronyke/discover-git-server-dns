@@ -566,51 +566,69 @@ gc_dns_git_server_update_srv_records_git() {
 }
 
 gc_dns_git_server_update_srv_records() {
-  gc_update_servers=( )
-  gc_update_servers_hostnames=( )
   GITCID_DIR=${GITCID_DIR:-"${PWD}/.gc/"}
+  
+  gc_update_servers="$("${HOME}/git-server/discover-git-server-dns/git-srv.sh")"
 
-  git pull --no-edit origin master
+  echo ""
+  echo "GIT SERVERS:"
+  echo ""
+  echo "$gc_update_servers"
+  echo ""
 
-  if [ -f "git-srv.sh" ]; then
-    while IFS= read -r k; do
-      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
-      # gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
-    done <<< "$(./git-srv.sh)"
-  elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-    while IFS= read -r k; do
-      gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
-    done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"
-  fi
-
-  for i in $@; do
-    # echo "$i"
-    if [ -f "git-srv.sh" ]; then
-      while IFS= read -r k; do
-        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
-      done <<< "$(./git-srv.sh "$i")"
-    elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
-      while IFS= read -r k; do
-        gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
-      done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"
-    fi
-    # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
-
-    # gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
-
-    # dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
-    dig +time=1 +tries=3 +short +nocomments @$i _git._tcp SRV 2>/dev/null | \
-    sed 's/;; connection timed out; no servers could be reached//g' | \
-    grep -v -e '^[[:space:]]*$'
-    if [ $? -eq 0 ]; then
-      gc_update_servers_hostnames+=( "$i" )
-      # gc_update_servers_hostnames+=( "$gc_server_hostname" )
-    fi
+  gc_update_servers_hostnames=( $@ )
+  
+  for i in ${gc_update_servers[@]}; do
+    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//')" )
   done
 
-  for i in "${gc_update_servers[@]}"; do
-    gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//' | sed 's/\.git$//')" )
-  done
+  echo ""
+  echo "GIT SERVER HOSTNAMES:"
+  echo ""
+  echo "$gc_update_servers_hostnames"
+  echo ""
+
+  # git pull --no-edit origin master
+
+  # if [ -f "git-srv.sh" ]; then
+  #   while IFS= read -r k; do
+  #     gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
+  #     # gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$")" )
+  #   done <<< "$(./git-srv.sh)"
+  # elif [ -f "${HOME}/git-server/discover-git-server-dns/git-srv.sh" ]; then
+  #   while IFS= read -r k; do
+  #     gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
+  #   done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh)"
+  # fi
+
+  # for i in $@; do
+  #   # echo "$i"
+  #   if [ -f "git-srv.sh" ]; then
+  #     while IFS= read -r k; do
+  #       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
+  #     done <<< "$(./git-srv.sh "$i")"
+  #   elif [ -f "$HOME/git-server/discover-git-server-dns/git-srv.sh" ]; then
+  #     while IFS= read -r k; do
+  #       gc_update_servers+=( "$(echo "$k" | grep -P "^.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+$" | sed 's/\.$//' | sed 's/\.git$//')" )
+  #     done <<< "$($HOME/git-server/discover-git-server-dns/git-srv.sh "$i")"
+  #   fi
+  #   # gc_update_servers+=( "$(./git-srv.sh "$i" | grep " 1234 ")" )
+
+  #   # gc_server_hostname="$(echo "$i" | grep -v -e '^[[:space:]]*$')"
+
+  #   # dig +time=2 +tries=1 +short +nocomments @$gc_server_hostname _git._tcp.git SRV 2>/dev/null | \
+  #   dig +time=1 +tries=3 +short +nocomments @$i _git._tcp SRV 2>/dev/null | \
+  #   sed 's/;; connection timed out; no servers could be reached//g' | \
+  #   grep -v -e '^[[:space:]]*$'
+  #   if [ $? -eq 0 ]; then
+  #     gc_update_servers_hostnames+=( "$i" )
+  #     # gc_update_servers_hostnames+=( "$gc_server_hostname" )
+  #   fi
+  # done
+
+  # for i in "${gc_update_servers[@]}"; do
+  #   gc_update_servers_hostnames+=( "$(echo "$i" | awk '{print $NF}' | sed 's/\.$//' | sed 's/\.git$//')" )
+  # done
 
   # echo "${gc_update_servers_hostnames[@]}"
   mkdir -p "${HOME}/.ssh"
@@ -628,7 +646,7 @@ gc_dns_git_server_update_srv_records() {
 
   if [ ! -d "${current_dir}/bind" ]; then
     git clone ~/git/etc/bind.git "${current_dir}/bind"
-    # cd "bind"
+    cd "${current_dir}/bind"
     # gc_dns_git_server_update_srv_records_git "$i"
     # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
@@ -638,13 +656,15 @@ gc_dns_git_server_update_srv_records() {
     # git fetch --all
     git pull --no-edit origin master
 
-    cd "${current_dir}"
 
     # gc_dns_git_server_update_srv_records_git "$i"
     # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
     # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
   fi
 
+  source <(curl -sL https://tinyurl.com/gitcid) -e
+
+  cd "${current_dir}"
 
 
 
@@ -734,14 +754,14 @@ gc_dns_git_server_update_srv_records() {
     # chmod 700 "${HOME}/.ssh"
     # ssh-keygen -F "${gc_ssh_host}" || ssh-keyscan "${gc_ssh_host}" >> "${HOME}/.ssh/known_hosts"
 
-    if [ ! -d "bind-${i}" ]; then
-      git clone ${i}:~/git/etc/bind.git "bind-${i}" && \
-      cd "bind-${i}" || continue
+    if [ ! -d "${current_dir}/bind-${i}" ]; then
+      git clone ${i}:~/git/etc/bind.git "${current_dir}/bind-${i}" && \
+      cd "${current_dir}/bind-${i}" || continue
       gc_dns_git_server_update_srv_records_git "$i"
       # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       
     else
-      cd "bind-${i}" || continue
+      cd "${current_dir}/bind-${i}" || continue
       git reset --hard HEAD
       # git fetch --all
       git pull --no-edit origin master
@@ -750,6 +770,9 @@ gc_dns_git_server_update_srv_records() {
       # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
+
+    
+    source <(curl -sL https://tinyurl.com/gitcid) -e
 
 
     # cd "$current_dir"
