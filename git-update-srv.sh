@@ -622,6 +622,30 @@ gc_dns_git_server_update_srv_records() {
 
   current_dir="$PWD"
 
+
+  cd "${current_dir}"
+
+
+  if [ ! -d "bind" ]; then
+      git clone ~/git/etc/bind.git && \
+      # cd "bind"
+      # gc_dns_git_server_update_srv_records_git "$i"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      
+    else
+      cd "bind" || continue
+      git reset --hard HEAD
+      # git fetch --all
+      git pull --no-edit origin master
+
+      # gc_dns_git_server_update_srv_records_git "$i"
+      # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
+      # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
+    fi
+
+
+
+
   for i in ${gc_update_servers_hostnames[@]}; do
     cd "$current_dir"
 
@@ -738,6 +762,8 @@ gc_dns_git_server_update_srv_records() {
   rm "${current_dir}/bind/db.git.srv.next" 2>/dev/null
 
 
+  
+
 
   cd "${current_dir}/bind"
 
@@ -810,7 +836,7 @@ gc_dns_git_server_update_srv_records() {
   echo " | DEBUG | ... END ADD SRV RECORDS ..."
   echo " | DEBUG |"
 
-  
+
 
   for i in ${gc_update_servers_hostnames[@]}; do
     cd "${current_dir}/bind"
