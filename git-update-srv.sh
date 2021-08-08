@@ -64,9 +64,9 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG |"
 
   # Remove old self hostname from zone file.
-  sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" ${current_bind_dir}/db.git
   sed -i "s/^\$(hostname)\.?\s*IN\s*A\s*.*\.?$//g" db.git
-  sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" db.git
+  # sed -i "s/^\${1}\.?\s*IN\s*A\s*.*\.?$//g" ${current_bind_dir}/db.git
+  # sed -i "s/^@\s*IN\s*A\s*.*\.?$//g" db.git
   
   cat ${current_bind_dir}/db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
   tee ${current_bind_dir}/db.git.a.next
@@ -82,10 +82,10 @@ gc_dns_git_server_update_srv_records_git() {
     tee -a ${current_bind_dir}/db.git.a.next
   fi
 
-  # Add current self hostname to zone file.
-  # echo "@       IN      A      $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
-  echo "$(hostname).       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
-  echo "$(hostname)       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
+  # # Add current peer hostname to zone file.
+  # # echo "@       IN      A      $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
+  # echo "${1}.       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
+  # echo "${1}       IN      A       $(ip a | grep `ip route ls | head -n 1 | awk '{print $5}'` | grep inet | awk '{print $2}' | sed 's/\/.*//g')" | sudo tee -a ${current_bind_dir}/db.git.a.next
   
   cp -rf ${current_bind_dir}/db.git.a.next ${current_bind_dir}/db.git.a.old
 
