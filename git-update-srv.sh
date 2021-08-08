@@ -41,7 +41,7 @@ gc_dns_git_server_update_srv_records_git() {
   echo " | DEBUG | ... ADD NS RECORDS ..."
   echo " | DEBUG |"
 
-  cat ${current_bind_dir}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
+  cat ${current_bind_dir}/db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | \
   tee ${current_bind_dir}/db.git.ns.next
 
   # cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
