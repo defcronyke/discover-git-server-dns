@@ -730,9 +730,87 @@ gc_dns_git_server_update_srv_records() {
   done
 
 
+
+
+
   rm "${current_dir}/bind/db.git.ns.next" 2>/dev/null
   rm "${current_dir}/bind/db.git.a.next" 2>/dev/null
   rm "${current_dir}/bind/db.git.srv.next" 2>/dev/null
+
+
+
+  cd "${current_dir}/bind"
+
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... ADD SOA RECORD ..."
+  echo " | DEBUG |"
+
+  cat db.git | head -n 11 | \
+  tee db.git.soa.next
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD SOA RECORD ..."
+  echo " | DEBUG |"
+  
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... ADD NS RECORDS ..."
+  echo " | DEBUG |"
+
+  cat db.git | grep -P "^@[[:space:]]+IN[[:space:]]+NS[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.ns.next
+
+  if [ -f db.git.ns.old ]; then
+    cat db.git.ns.old | sort | uniq | \
+    tee -a db.git.ns.next
+  fi
+
+  cp -rf db.git.ns.next db.git.ns.old
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD NS RECORDS ..."
+  echo " | DEBUG |"
+
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... ADD A RECORDS ..."
+  echo " | DEBUG |"
+
+  cat db.git | grep -P "^.+\.?[[:space:]]+IN[[:space:]]+A[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.a.next
+
+  if [ -f db.git.a.old ]; then
+    cat db.git.a.old | sort | uniq | \
+    tee -a db.git.a.next
+  fi
+  
+  cp -rf db.git.a.next db.git.a.old
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD A RECORDS ..."
+  echo " | DEBUG |"  
+
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... ADD SRV RECORDS ..."
+  echo " | DEBUG |"
+
+  cat db.git | grep -P "^_git\._tcp\.?.*[[:space:]]+IN[[:space:]]+SRV[[:space:]]+.+[[:space:]]+.+[[:space:]]+1234[[:space:]]+.+\.?$" | sort | uniq | \
+  tee db.git.srv.next
+
+  if [ -f db.git.ns.old ]; then
+    cat db.git.srv.old | sort | uniq | \
+    tee -a db.git.srv.next
+  fi
+  
+  cp -rf db.git.srv.next db.git.srv.old
+
+  echo " | DEBUG |"
+  echo " | DEBUG | ... END ADD SRV RECORDS ..."
+  echo " | DEBUG |"
+
+  
 
   for i in ${gc_update_servers_hostnames[@]}; do
     cd "${current_dir}/bind"
