@@ -67,15 +67,20 @@ gc_dns_post_receive_update_bind_config() {
   sudo cp -r /etc/bind /etc/bind.old
 
   cd "${HOME}/git-server/discover-git-server-dns/workdir/bind/"
+ 
   git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind" pull origin master
 
-  sudo cp -r "${HOME}/git-server/discover-git-server-dns/workdir/bind/"* /etc/bind
+  # sudo cp -r "${HOME}/git-server/discover-git-server-dns/workdir/bind/"* /etc/bind
 
   # sudo git --work-tree="/etc/bind" clone "${HOME}/git/etc/bind.git" /etc/bind
 
   sudo chown -R root:bind /etc/bind
   sudo chmod 775 /etc/bind
 
+
+  cd /etc/bind
+
+  git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull origin master
 
 
 
