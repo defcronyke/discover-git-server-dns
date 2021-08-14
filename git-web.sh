@@ -44,7 +44,7 @@ discover_git_server_dns_git_web() {
       curl --connect-timeout $GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
       if [ $? -eq 0 ]; then
         GC_ACTIVE_GIT_SERVERS+=( "$j" )
-        # echo "$j"
+        echo "$j"
       fi
     done
   done
