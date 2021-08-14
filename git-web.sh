@@ -6,7 +6,7 @@
 # timeout.
 
 discover_git_server_dns_git_web() {
-  GC_LOCAL_SERVER_DETECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_TIMEOUT:-6}
+  GC_LOCAL_SERVER_DETECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_TIMEOUT:-16}
 
   GC_NEW_GIT_SERVERS_TEST=( )
   GC_NEW_GIT_SERVERS=( )
@@ -51,6 +51,8 @@ discover_git_server_dns_git_web() {
   else
     gc_git_web_output_res=0
   fi
+
+  unset GC_LOCAL_SERVER_DETECT_TIMEOUT
 
   return $gc_git_web_output_res
 }
