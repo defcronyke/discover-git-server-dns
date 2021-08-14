@@ -37,15 +37,19 @@ discover_git_server_dns_git_web() {
     fi
 
     for j in ${gc_servers[@]}; do
-      # echo "$j"
+      if [ -z "$j" ]; then
+        continue
+      fi
+      
       curl --connect-timeout $GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
       if [ $? -eq 0 ]; then
         GC_ACTIVE_GIT_SERVERS+=( "$j" )
+        echo "$j"
       fi
     done
   done
 
-  echo "$(for i in ${GC_ACTIVE_GIT_SERVERS[@]}; do echo "$i"; done)" | grep -v -e "^[[:space:]]*$" | sort | uniq
+  # echo "$(for i in ${GC_ACTIVE_GIT_SERVERS[@]}; do echo "$i"; done)" | grep -v -e "^[[:space:]]*$" | sort | uniq
 
   if [ -z "$GC_ACTIVE_GIT_SERVERS" ]; then
     gc_git_web_output_res=1
