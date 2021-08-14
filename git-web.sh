@@ -6,6 +6,7 @@
 # timeout.
 
 discover_git_server_dns_git_web() {
+  GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT:-16}
   GC_LOCAL_SERVER_DETECT_TIMEOUT=${GC_LOCAL_SERVER_DETECT_TIMEOUT:-16}
 
   GC_NEW_GIT_SERVERS_TEST=( )
@@ -20,7 +21,7 @@ discover_git_server_dns_git_web() {
   done
 
   for i in ${GC_NEW_GIT_SERVERS_TEST[@]}; do
-    curl -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$i" >/dev/null 2>&1
+    curl --connect-timeout $GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$i" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
       GC_NEW_GIT_SERVERS+=( "$i" )
       GC_ACTIVE_GIT_SERVERS+=( "$i" )
@@ -37,7 +38,7 @@ discover_git_server_dns_git_web() {
 
     for j in ${gc_servers[@]}; do
       # echo "$j"
-      curl -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
+      curl --connect-timeout $GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT -m $GC_LOCAL_SERVER_DETECT_TIMEOUT "$j" >/dev/null 2>&1
       if [ $? -eq 0 ]; then
         GC_ACTIVE_GIT_SERVERS+=( "$j" )
       fi
@@ -52,6 +53,7 @@ discover_git_server_dns_git_web() {
     gc_git_web_output_res=0
   fi
 
+  unset GC_LOCAL_SERVER_DETECT_CONNECT_TIMEOUT
   unset GC_LOCAL_SERVER_DETECT_TIMEOUT
 
   return $gc_git_web_output_res
