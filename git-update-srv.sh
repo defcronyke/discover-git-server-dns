@@ -763,6 +763,8 @@ gc_dns_git_server_update_srv_records() {
     echo ""
     echo "Verifying peer host: $i"
     echo ""
+    
+    ssh-keygen -f "${HOME}/.ssh/known_hosts" -R "$i"
 
     ssh-keygen -F "$i" || ssh-keyscan "$i" | tee -a "${HOME}/.ssh/known_hosts" >/dev/null
 
