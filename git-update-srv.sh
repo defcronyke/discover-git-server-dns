@@ -608,7 +608,7 @@ gc_dns_git_server_update_srv_records() {
   echo ""
   echo "GIT SERVER HOSTNAMES:"
   echo ""
-  echo "$gc_update_servers_hostnames"
+  echo "${gc_update_servers_hostnames[@]}"
   echo ""
 
   # git pull --no-edit origin master
@@ -961,6 +961,45 @@ gc_dns_git_server_update_srv_records() {
   git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" commit -m "Update bind zone files."
 
   git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" push -u origin master
+
+
+
+
+
+
+
+
+  # Update all other known servers.
+  for i in ${gc_update_servers_hostnames[@]}; do
+
+    # cd "${current_dir}/bind"
+
+    if [ "$i" == "$(hostname)" ]; then
+      continue
+    fi
+
+    cd "${current_dir}/bind-${i}"
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+
+    cp -rf db.git db.git.old
+
+    cp -rf "${current_dir}/bind/db.git" db.git
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" add db.git
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" commit -m "Update peer DNS records."
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" push -u origin master
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+    
+  done
+
+
+
 
 
 
