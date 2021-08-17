@@ -583,7 +583,7 @@ gc_dns_git_server_update_srv_records_git() {
 gc_dns_git_server_update_srv_records() {
   GITCID_DIR=${GITCID_DIR:-"${PWD}/.gc/"}
   
-  gc_update_servers="$("${HOME}/git-server/discover-git-server-dns/git-srv.sh" $@ $(hostname) git1)"
+  gc_update_servers="$("${HOME}/git-server/discover-git-server-dns/git-srv.sh" $@ $(hostname) git1 git2)"
 
   echo ""
   echo "GIT SERVERS:"
