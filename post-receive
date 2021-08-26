@@ -101,7 +101,11 @@ gc_dns_post_receive_update_bind_config() {
 
   cd /etc/bind
 
-  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull origin master
+  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" add .
+  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" commit -m "Save DNS records during git post-receive hook."
+
+  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" pull --no-edit origin master
+  sudo git --git-dir="/etc/bind/.git" --work-tree="/etc/bind" rebase
 
 
   sudo systemctl reload bind9 || \
@@ -145,20 +149,22 @@ gc_dns_post_receive_update_bind_config() {
       cd "${HOME}/git-server/discover-git-server-dns"
       
       git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" pull --no-edit origin master
-
-      git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" rebase --no-edit
+      git --git-dir="${HOME}/git-server/discover-git-server-dns/.git" --work-tree="${HOME}/git-server/discover-git-server-dns" rebase
 
       "${HOME}/git-server/discover-git-server-dns/install.sh"
       
-      "${HOME}/git-server/discover-git-server-dns/git-update-srv.sh" $(hostname) git1 git2
+      # "${HOME}/git-server/discover-git-server-dns/git-update-srv.sh" $(hostname) git1 git2
       
       # cd "$current_dir3"
     
-    elif [ -f "git-update-srv.sh" ]; then
-    #   # git --git-dir="${current_dir3}/.git" --work-tree="${current_dir3}" pull origin master
-    #   # git pull origin master
+    # else
+
+    # elif [ -f "git-update-srv.sh" ]; then
+      # git --git-dir="${current_dir3}/.git" --work-tree="${current_dir3}" pull origin master
+      # git pull origin master
       
-      ./git-update-srv.sh $(hostname) git1 git2
+      # ./git-update-srv.sh $(hostname) git1 git2
+
     fi
 
 
