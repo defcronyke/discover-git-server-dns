@@ -4,11 +4,12 @@
 #
 
 gc_dns_git_server_update_srv_records_git() {
-
-  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
-
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" git add .
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" git commit -m "Save current DNS records before update."
   git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" rebase --no-edit
 
+  # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" reset --hard HEAD
   # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
 
 
@@ -577,6 +578,13 @@ gc_dns_git_server_update_srv_records_git() {
   # # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" commit -m "Update records END."; \
   # # git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" push -u origin master
 
+
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" git add .
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" git commit -m "Save current DNS records after update."
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" pull --no-edit origin master
+  git --git-dir="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}/.git" --work-tree="${HOME}/git-server/discover-git-server-dns/workdir/bind-${1}" rebase --no-edit
+
+
   return 0
 }
 
@@ -682,9 +690,16 @@ gc_dns_git_server_update_srv_records() {
       
   else
     cd "${current_dir}/bind"
-    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" reset --hard HEAD
-    # git fetch --all
+    
+    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" git add .
+    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" git commit -m "Save initial DNS records before update."
     git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" pull --no-edit origin master
+    git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" rebase --no-edit
+
+    # git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" reset --hard HEAD
+    # git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" pull --no-edit origin master
+    
+    # # git fetch --all
 
 
     # gc_dns_git_server_update_srv_records_git "$i"
@@ -794,11 +809,20 @@ gc_dns_git_server_update_srv_records() {
       
     else
       cd "${current_dir}/bind-${i}" || continue
-      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
-      # git fetch --all
-      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
 
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" git add .
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" git commit -m "Save DNS records after peers update."
+      
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+      git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" rebase --no-edit
+
+      # git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
+      # git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+
+      # git fetch --all
+      
       gc_dns_git_server_update_srv_records_git "$i"
+      
       # gc_dns_git_server_update_srv_records_git "${gc_update_servers_hostnames[@]}"
       # gc_dns_git_server_update_srv_records_git $gc_update_servers_hostnames
     fi
@@ -964,9 +988,11 @@ gc_dns_git_server_update_srv_records() {
   cp -rf ${current_dir}/bind/db.git.next ${current_dir}/bind/db.git
 
   git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" add .
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" commit -m "Update self DNS records."
 
-  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" commit -m "Update bind zone files."
-
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" pull --no-edit origin master
+  git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" rebase --no-edit
+  
   git --git-dir="${current_dir}/bind/.git" --work-tree="${current_dir}/bind" push -u origin master
 
 
@@ -987,9 +1013,13 @@ gc_dns_git_server_update_srv_records() {
 
     cd "${current_dir}/bind-${i}"
 
-    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
+    # git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" reset --hard HEAD
+
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" add .
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" commit -m "Update peer DNS records before pull."
 
     git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" rebase --no-edit
 
     cp -rf db.git db.git.old
 
@@ -999,9 +1029,12 @@ gc_dns_git_server_update_srv_records() {
 
     git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" commit -m "Update peer DNS records."
 
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" rebase --no-edit
+
     git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" push -u origin master
 
-    git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
+    # git --git-dir="${current_dir}/bind-${i}/.git" --work-tree="${current_dir}/bind-${i}" pull --no-edit origin master
     
   done
 
@@ -1304,8 +1337,20 @@ gc_dns_git_server_update_srv_records() {
   return 0
 }
 
-gc_dns_git_server_update_srv_records $@
+gc_dns_git_server_update_srv_records $@ git1 git2
 
-# # Run this a second time to cause the DNS records 
-# # to propagate to the other git servers.
-# gc_dns_git_server_update_srv_records $@
+# Run this a second time to cause the DNS records 
+# to propagate to the other git servers.
+echo ""
+echo "----------"
+echo ""
+echo "NOTICE: Running service discovery again to propagate DNS records to more servers."
+echo ""
+echo "Running with the following args:"
+echo ""
+echo "  $0 $@ ${gc_update_servers_hostnames[@]} git1 git2"
+echo ""
+echo "----------"
+echo ""
+
+gc_dns_git_server_update_srv_records $@ ${gc_update_servers_hostnames[@]} git1 git2
